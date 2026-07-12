@@ -1,0 +1,7 @@
+{
+  "redirects": [
+    { "source": "/", 
+    "destination": "/JhonjaDev/Index/index.html", 
+    "permanent": false }
+  ]
+}
