@@ -184,21 +184,36 @@ function renderGastos() {
 }
 
 async function registrarGasto() {
-  const concepto = prompt('Concepto del gasto (ej: "Dominio jhonja.dev", "Suscripción a herramienta X"):');
-  if (concepto === null || !concepto.trim()) return;
+  const opciones = [
+    { label: 'Suscripción — Claude', categoria: 'herramientas' },
+    { label: 'Suscripción — ChatGPT', categoria: 'herramientas' },
+    { label: 'Suscripción — Laravel', categoria: 'herramientas' },
+    { label: 'Suscripción — Supabase', categoria: 'herramientas' },
+    { label: 'Dominio', categoria: 'hosting' },
+    { label: 'Otro (especificar)', categoria: 'otro' },
+  ];
+  const listado = opciones.map((o, i) => `${i + 1}. ${o.label}`).join('\n');
+  const seleccion = prompt(`¿Qué gasto registrás? Escribí el número:\n\n${listado}`);
+  if (seleccion === null) return;
+  const opcion = opciones[parseInt(seleccion, 10) - 1];
+  if (!opcion) { alert('Número inválido.'); return; }
+
+  let concepto = opcion.label;
+  if (opcion.label.startsWith('Otro')) {
+    concepto = prompt('Concepto del gasto:');
+    if (concepto === null || !concepto.trim()) return;
+    concepto = concepto.trim();
+  }
 
   const montoRaw = prompt('Monto (solo números):');
   if (montoRaw === null) return;
   const monto = parseInt(montoRaw.replace(/\D/g, ''), 10);
   if (!monto) { alert('Monto inválido.'); return; }
 
-  const categoria = prompt('Categoría (herramientas / hosting / marketing / otro):', 'otro');
-  if (categoria === null) return;
-
   const { error } = await supabaseClient.from('gastos').insert({
-    concepto: concepto.trim(),
+    concepto,
     monto,
-    categoria: categoria.trim(),
+    categoria: opcion.categoria,
     fecha: today(),
   });
 

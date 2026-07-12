@@ -107,6 +107,69 @@ const ESTADOS_PAGO = {
 
 function fmt(n) { return '$' + n.toLocaleString('es-CO'); }
 
+/* ---- modal: solicitar servicio adicional ---- */
+const servicioOverlay = document.getElementById('servicioOverlay');
+const servicioForm = document.getElementById('servicioForm');
+const servicioError = document.getElementById('servicioError');
+const servicioSuccess = document.getElementById('servicioSuccess');
+const servicioSubmitBtn = document.getElementById('servicioSubmitBtn');
+
+document.getElementById('btnSolicitarServicio').addEventListener('click', () => {
+  servicioForm.style.display = 'block';
+  servicioForm.reset();
+  servicioError.classList.remove('show');
+  servicioSuccess.style.display = 'none';
+  servicioOverlay.classList.add('show');
+});
+document.getElementById('servicioClose').addEventListener('click', () => servicioOverlay.classList.remove('show'));
+servicioOverlay.addEventListener('click', (e) => { if (e.target === servicioOverlay) servicioOverlay.classList.remove('show'); });
+
+servicioForm.addEventListener('submit', async function (e) {
+  e.preventDefault();
+  servicioError.classList.remove('show');
+
+  if (!supabaseReady) {
+    servicioError.textContent = 'No se pudo conectar. Probá de nuevo en un momento.';
+    servicioError.classList.add('show');
+    return;
+  }
+
+  servicioSubmitBtn.disabled = true;
+  servicioSubmitBtn.textContent = 'Enviando…';
+
+  const tipo = document.getElementById('servicioTipo').value;
+  const detalle = document.getElementById('servicioDetalle').value.trim();
+
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const { data: cliente, error: clienteError } = await supabaseClient
+      .from('clientes')
+      .select('id')
+      .eq('user_id', sessionData.session.user.id)
+      .single();
+
+    if (clienteError || !cliente) throw clienteError || new Error('No se encontró el cliente');
+
+    const { error: insertError } = await supabaseClient.from('solicitudes_servicio').insert({
+      cliente_id: cliente.id,
+      servicio: tipo,
+      detalle: detalle,
+      estado: 'pendiente',
+    });
+    if (insertError) throw insertError;
+
+    servicioForm.style.display = 'none';
+    servicioSuccess.style.display = 'block';
+  } catch (err) {
+    console.error('Error enviando la solicitud:', err);
+    servicioError.textContent = 'No se pudo enviar la solicitud. Probá de nuevo.';
+    servicioError.classList.add('show');
+  } finally {
+    servicioSubmitBtn.disabled = false;
+    servicioSubmitBtn.textContent = 'Enviar solicitud';
+  }
+});
+
 function loadPagos() {
   const pagos = [
     { concepto: 'Plan Plus — 50% inicial', monto: 225000, estado: 'pagado', fecha: '01 jul 2026' },

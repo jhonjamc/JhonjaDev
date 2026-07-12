@@ -4,12 +4,23 @@
   /* ---- auth gate (planes + contacto exigen sesión) ---- */
   var SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
+  var ADMIN_EMAIL = 'jhonjamoguea@icloud.com';
   var supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   var currentSession = null;
 
+  function updateAccountLinks() {
+    var isAdmin = currentSession && (currentSession.user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    var destino = currentSession ? (isAdmin ? '../Proyectos/proyectos.html' : '../Portal/portal.html') : '../Login/login.html';
+    var texto = currentSession ? 'Mi cuenta' : 'Iniciar sesión';
+    document.querySelectorAll('.nav-account-link').forEach(function (el) {
+      el.href = destino;
+      el.textContent = texto;
+    });
+  }
+
   if (supabaseClient) {
-    supabaseClient.auth.getSession().then(function(res){ currentSession = res.data.session; });
-    supabaseClient.auth.onAuthStateChange(function(_event, session){ currentSession = session; });
+    supabaseClient.auth.getSession().then(function(res){ currentSession = res.data.session; updateAccountLinks(); });
+    supabaseClient.auth.onAuthStateChange(function(_event, session){ currentSession = session; updateAccountLinks(); });
   }
 
   function goToLogin(gate, plan) {

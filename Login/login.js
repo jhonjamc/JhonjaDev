@@ -99,11 +99,33 @@ function routeAfterAuth(user) {
     : '../Portal/portal.html';
 }
 
+// Si el link de confirmación de email trae type=signup en el hash,
+// Supabase auto-loguea a la persona. No queremos ese auto-login:
+// preferimos que confirme y después entre con documento + contraseña.
+const hashParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+const authEventType = hashParams.get('type');
+const justConfirmed = authEventType === 'signup' || authEventType === 'email_change' || authEventType === 'invite';
+
+function showInfoBanner(message) {
+  const notice = document.createElement('div');
+  notice.className = 'form-info show';
+  notice.style.marginBottom = '18px';
+  notice.textContent = message;
+  document.querySelector('.login-card').prepend(notice);
+}
+
 // Si ya hay sesión activa, saltar el login directamente
 if (supabaseReady) {
-  supabaseClient.auth.getSession().then(({ data }) => {
-    if (data.session) routeAfterAuth(data.session.user);
-  });
+  if (justConfirmed) {
+    supabaseClient.auth.signOut().then(() => {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      showInfoBanner('¡Email confirmado! Ya podés iniciar sesión con tu documento y contraseña.');
+    });
+  } else {
+    supabaseClient.auth.getSession().then(({ data }) => {
+      if (data.session) routeAfterAuth(data.session.user);
+    });
+  }
 }
 
 /* ---- iniciar sesión (documento + contraseña) ---- */

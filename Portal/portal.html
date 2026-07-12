@@ -14,6 +14,7 @@
   <a href="../Index/index.html" class="logo"><span>&lt;/&gt;</span> Jhonja.Dev</a>
   <div class="topnav-right">
     <span class="who" id="whoLabel">Hola 👋</span>
+    <a href="../Index/index.html" class="btn-ghost">Ir al inicio</a>
     <a href="../Index/index.html" class="btn-ghost" id="logoutBtn">Cerrar sesión</a>
   </div>
 </header>
@@ -68,11 +69,44 @@
   <section class="block">
     <h2 class="block-title">¿Necesitás algo extra?</h2>
     <div class="cta-card">
-      <p>Podés pedir mejoras, una nueva sección o cualquier servicio adicional directamente desde acá.</p>
-      <a href="../Index/index.html#contacto" class="btn-primary">Solicitar servicio adicional</a>
+      <p>Podés pedir mejoras, una nueva sección o cualquier servicio adicional directamente desde acá. Te contactamos para confirmar el precio antes de cobrarte nada.</p>
+      <button type="button" class="btn-primary" id="btnSolicitarServicio">Solicitar servicio adicional</button>
     </div>
   </section>
 </main>
+
+<!-- ---- MODAL: solicitar servicio adicional ---- -->
+<div class="modal-overlay" id="servicioOverlay">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="servicioClose">✕</button>
+    <h2>Solicitar servicio adicional</h2>
+    <form id="servicioForm">
+      <div class="form-group">
+        <label for="servicioTipo">¿Qué necesitás?</label>
+        <select id="servicioTipo" required>
+          <option value="">Elegí una opción</option>
+          <option>Integración WhatsApp</option>
+          <option>Nueva sección</option>
+          <option>Rediseño parcial</option>
+          <option>Rediseño completo</option>
+          <option>Mantenimiento mensual</option>
+          <option>Actualización de contenido</option>
+          <option>Formulario con Supabase</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="servicioDetalle">Contanos más</label>
+        <textarea id="servicioDetalle" rows="4" placeholder="Describí qué necesitás para que podamos cotizarlo bien" required></textarea>
+      </div>
+      <div class="form-error" id="servicioError"></div>
+      <button type="submit" class="submit-btn" id="servicioSubmitBtn">Enviar solicitud</button>
+    </form>
+    <div class="form-info show" id="servicioSuccess" style="display:none; margin-top:14px;">
+      ¡Listo! Recibimos tu solicitud, te vamos a contactar para confirmar el precio.
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal.js" defer></script>
