@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proyectos — Panel de gestión</title>
+<title>Proyectos — Jhonja.Dev</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="proyectos.css">
@@ -12,7 +12,7 @@
 
 <div class="admin-shell">
   <aside class="sidebar">
-    <a href="../Index/index.html" class="logo"><span>&lt;/&gt;</span> estudio.dev</a>
+    <a href="../Index/index.html" class="logo"><span>&lt;/&gt;</span> Jhonja.Dev</a>
     <div class="sidebar-sub">Panel de gestión</div>
     <nav class="side-nav">
       <a href="../Proyectos/proyectos.html" class="side-link active">
@@ -29,7 +29,7 @@
       </a>
     </nav>
     <div class="side-foot">
-      <a href="../Login/login.html" class="side-link" id="logoutBtn">
+      <a href="../Index/index.html" class="side-link" id="logoutBtn">
         <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Cerrar sesión</span>
       </a>
@@ -42,10 +42,32 @@
         <div class="eyebrow">Gestión</div>
         <h1 class="page-title">Proyectos</h1>
       </div>
-      <div class="demo-badge"><span class="dot"></span> Datos de ejemplo — conectá Supabase para ver los reales</div>
     </div>
 
     <div class="stats-row" id="statsRow"></div>
+
+    <!-- ---- CONTACTOS NUEVOS (leads sin convertir a proyecto) ---- -->
+    <div class="panel" id="contactosPanel" style="margin-bottom:24px; display:none;">
+      <div class="panel-head">
+        Contactos nuevos
+        <span class="badge badge-violet" id="contactosCount">0</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Plan de interés</th>
+              <th>Mensaje</th>
+              <th>Fecha</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="contactosBody"></tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="panel">
       <div class="panel-head">Todos los proyectos</div>
@@ -58,6 +80,7 @@
               <th>Estado</th>
               <th>Entrega</th>
               <th>Progreso</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="proyectosBody"></tbody>
@@ -67,6 +90,7 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="proyectos.js" defer></script>
 </body>
 </html>

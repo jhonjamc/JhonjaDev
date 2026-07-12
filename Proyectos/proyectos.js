@@ -1,21 +1,13 @@
-/* ==========================================================
-   DATOS DE EJEMPLO
-   Cuando tengas Supabase conectado, reemplazá este array por:
+const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
+const ADMIN_EMAIL = 'jhonjamoguea@icloud.com';
 
-   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-   const { data: proyectos } = await supabase
-     .from('proyectos')
-     .select('id, plan, estado, fecha_entrega, progreso, clientes(nombre)')
-     .order('fecha_entrega', { ascending: true });
-   ========================================================== */
-const proyectos = [
-  { cliente: 'Panadería La Espiga', plan: 'Plan Pro', estado: 'en_curso', entrega: '18 jul 2026', progreso: 65 },
-  { cliente: 'Clínica Dental Sonrisa', plan: 'Plan Plus', estado: 'en_curso', entrega: '25 jul 2026', progreso: 30 },
-  { cliente: 'Estudio Jurídico Reyes', plan: 'Plan Premium', estado: 'pendiente', entrega: '14 ago 2026', progreso: 0 },
-  { cliente: 'Ferretería El Tornillo', plan: 'Plan Pro', estado: 'entregado', entrega: '02 jul 2026', progreso: 100 },
-  { cliente: 'Gimnasio PowerFit', plan: 'Plan Plus', estado: 'entregado', entrega: '28 jun 2026', progreso: 100 },
-  { cliente: 'Café Andina', plan: 'Plan Pro', estado: 'en_revision', entrega: '15 jul 2026', progreso: 90 },
-];
+let supabaseClient = null;
+try {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (err) {
+  console.error('No se pudo iniciar Supabase:', err.message);
+}
 
 const ESTADOS = {
   pendiente:   { label: 'Pendiente',   badge: 'badge-amber'  },
@@ -23,8 +15,41 @@ const ESTADOS = {
   en_revision: { label: 'En revisión', badge: 'badge-violet' },
   entregado:   { label: 'Entregado',   badge: 'badge-green'  },
 };
+const ESTADOS_KEYS = Object.keys(ESTADOS);
 
-function renderStats() {
+/* ---- guard: solo el admin puede ver este panel ---- */
+async function checkAdminAccess() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data.session) {
+    window.location.href = '../Login/login.html';
+    return false;
+  }
+  if ((data.session.user.email || '').toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    window.location.href = '../Portal/portal.html';
+    return false;
+  }
+  return true;
+}
+
+/* ---- proyectos: cargar, mostrar, editar progreso/estado ---- */
+async function loadProyectos() {
+  const { data: proyectos, error } = await supabaseClient
+    .from('proyectos')
+    .select('id, plan, estado, fecha_entrega, progreso, clientes(nombre)')
+    .order('fecha_entrega', { ascending: true });
+
+  if (error) {
+    console.error('Error cargando proyectos:', error);
+    document.getElementById('proyectosBody').innerHTML =
+      `<tr><td colspan="6">No se pudieron cargar los proyectos.</td></tr>`;
+    return;
+  }
+
+  renderStats(proyectos || []);
+  renderProyectos(proyectos || []);
+}
+
+function renderStats(proyectos) {
   const total = proyectos.length;
   const enCurso = proyectos.filter(p => p.estado === 'en_curso' || p.estado === 'en_revision').length;
   const entregados = proyectos.filter(p => p.estado === 'entregado').length;
@@ -36,29 +61,176 @@ function renderStats() {
   `;
 }
 
-function renderTable() {
+function renderProyectos(proyectos) {
+  if (proyectos.length === 0) {
+    document.getElementById('proyectosBody').innerHTML =
+      `<tr><td colspan="6">Todavía no hay proyectos cargados.</td></tr>`;
+    return;
+  }
+
   const rows = proyectos.map(p => {
-    const e = ESTADOS[p.estado];
+    const e = ESTADOS[p.estado] || ESTADOS.pendiente;
+    const clienteNombre = p.clientes?.nombre || '(sin nombre)';
+    const entrega = p.fecha_entrega
+      ? new Date(p.fecha_entrega + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '—';
     return `
-      <tr>
-        <td class="cell-primary">${p.cliente}</td>
-        <td>${p.plan}</td>
+      <tr data-id="${p.id}">
+        <td class="cell-primary">${clienteNombre}</td>
+        <td>${p.plan || '—'}</td>
         <td><span class="badge ${e.badge}">${e.label}</span></td>
-        <td>${p.entrega}</td>
+        <td>${entrega}</td>
         <td>
-          <div class="progress-track"><div class="progress-fill" style="width:${p.progreso}%"></div></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${p.progreso || 0}%"></div></div>
         </td>
+        <td><button type="button" class="btn-edit-proyecto" data-id="${p.id}" data-progreso="${p.progreso || 0}" data-estado="${p.estado}">Editar</button></td>
       </tr>
     `;
   }).join('');
   document.getElementById('proyectosBody').innerHTML = rows;
+
+  document.querySelectorAll('.btn-edit-proyecto').forEach(btn => {
+    btn.addEventListener('click', () => editProyecto(btn.dataset.id, btn.dataset.progreso, btn.dataset.estado));
+  });
 }
 
-renderStats();
-renderTable();
+async function editProyecto(id, progresoActual, estadoActual) {
+  const nuevoEstado = prompt(
+    `Estado del proyecto (opciones: ${ESTADOS_KEYS.join(', ')})`,
+    estadoActual
+  );
+  if (nuevoEstado === null) return; // canceló
+  if (!ESTADOS_KEYS.includes(nuevoEstado)) {
+    alert('Estado inválido. Tiene que ser exactamente uno de: ' + ESTADOS_KEYS.join(', '));
+    return;
+  }
 
-// Logout: cuando conectes Supabase real, reemplazá este handler por
-// supabase.auth.signOut() antes de redirigir a Login.
-document.getElementById('logoutBtn').addEventListener('click', function (e) {
-  // placeholder — sin sesión real todavía
+  const nuevoProgresoRaw = prompt('Progreso (0 a 100):', progresoActual);
+  if (nuevoProgresoRaw === null) return;
+  const nuevoProgreso = Math.max(0, Math.min(100, parseInt(nuevoProgresoRaw, 10) || 0));
+
+  const { error } = await supabaseClient
+    .from('proyectos')
+    .update({ estado: nuevoEstado, progreso: nuevoProgreso })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error actualizando proyecto:', error);
+    alert('No se pudo guardar el cambio. Probá de nuevo.');
+    return;
+  }
+
+  loadProyectos();
+}
+
+/* ---- contactos nuevos: convertir a proyecto ---- */
+async function loadContactos() {
+  const { data: contactos, error } = await supabaseClient
+    .from('contactos')
+    .select('id, cliente_id, nombre, email, plan_interes, mensaje, estado, created_at')
+    .eq('estado', 'nuevo')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error cargando contactos:', error);
+    return;
+  }
+
+  const panel = document.getElementById('contactosPanel');
+  const count = document.getElementById('contactosCount');
+  count.textContent = (contactos || []).length;
+
+  if (!contactos || contactos.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+
+  const rows = contactos.map(c => {
+    const fecha = new Date(c.created_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `
+      <tr>
+        <td class="cell-primary">${c.nombre || '—'}</td>
+        <td>${c.email || '—'}</td>
+        <td>${c.plan_interes || '—'}</td>
+        <td>${c.mensaje || '—'}</td>
+        <td>${fecha}</td>
+        <td>
+          <button type="button" class="btn-convertir" data-id="${c.id}" data-cliente="${c.cliente_id}" data-plan="${c.plan_interes || ''}">Convertir a proyecto</button>
+          <button type="button" class="btn-descartar" data-id="${c.id}">Descartar</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  document.getElementById('contactosBody').innerHTML = rows;
+
+  document.querySelectorAll('.btn-convertir').forEach(btn => {
+    btn.addEventListener('click', () => convertirContacto(btn.dataset.id, btn.dataset.cliente, btn.dataset.plan));
+  });
+  document.querySelectorAll('.btn-descartar').forEach(btn => {
+    btn.addEventListener('click', () => descartarContacto(btn.dataset.id));
+  });
+}
+
+async function convertirContacto(contactoId, clienteId, planSugerido) {
+  if (!clienteId || clienteId === 'null') {
+    alert('Este contacto no tiene un cliente vinculado todavía (falta que se registre).');
+    return;
+  }
+
+  const plan = prompt('Plan (Plan Pro / Plan Plus / Plan Premium):', planSugerido || 'Plan Pro');
+  if (plan === null) return;
+
+  const entrega = prompt('Fecha estimada de entrega (AAAA-MM-DD):', '');
+  if (entrega === null) return;
+
+  const { error: insertError } = await supabaseClient
+    .from('proyectos')
+    .insert({
+      cliente_id: clienteId,
+      plan: plan,
+      estado: 'pendiente',
+      fecha_entrega: entrega || null,
+      progreso: 0
+    });
+
+  if (insertError) {
+    console.error('Error creando proyecto:', insertError);
+    alert('No se pudo crear el proyecto. Probá de nuevo.');
+    return;
+  }
+
+  const { error: updateError } = await supabaseClient
+    .from('contactos')
+    .update({ estado: 'convertido' })
+    .eq('id', contactoId);
+
+  if (updateError) console.error('Error marcando el contacto como convertido:', updateError);
+
+  loadContactos();
+  loadProyectos();
+}
+
+async function descartarContacto(contactoId) {
+  if (!confirm('¿Descartar este contacto? No se va a crear ningún proyecto.')) return;
+  const { error } = await supabaseClient
+    .from('contactos')
+    .update({ estado: 'descartado' })
+    .eq('id', contactoId);
+  if (error) console.error('Error descartando contacto:', error);
+  loadContactos();
+}
+
+/* ---- init ---- */
+(async function init() {
+  const ok = await checkAdminAccess();
+  if (!ok) return;
+  loadContactos();
+  loadProyectos();
+})();
+
+document.getElementById('logoutBtn').addEventListener('click', async function (e) {
+  e.preventDefault();
+  await supabaseClient.auth.signOut();
+  window.location.href = '../Index/index.html';
 });

@@ -2,15 +2,14 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---- auth gate (planes + contacto exigen sesión) ---- */
-  // ⚠️ Mismos valores que en Login/login.js — pegá tu URL y anon key reales
   var SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
-  var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  var supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   var currentSession = null;
 
-  if (supabase) {
-    supabase.auth.getSession().then(function(res){ currentSession = res.data.session; });
-    supabase.auth.onAuthStateChange(function(_event, session){ currentSession = session; });
+  if (supabaseClient) {
+    supabaseClient.auth.getSession().then(function(res){ currentSession = res.data.session; });
+    supabaseClient.auth.onAuthStateChange(function(_event, session){ currentSession = session; });
   }
 
   function goToLogin(gate, plan) {
@@ -126,7 +125,6 @@
         return;
       }
       var full = codeLines[lineIndex].t;
-      // reveal char by char but respecting html tags: reveal whole tags at once
       var visible = revealChars(full, charIndex);
       redraw(visible);
       charIndex += 3;
@@ -145,7 +143,6 @@
       return div.textContent || '';
     }
 
-    // simplified: type raw text length-based reveal using textContent length, re-render full markup progressively
     function revealChars(fullHtml, count){
       var totalText = stripTags(fullHtml).length;
       var ratio = Math.min(count / Math.max(totalText,1), 1);
@@ -157,7 +154,6 @@
       for(var i=0; i<lineIndex; i++){
         out += '<span class="ln">'+String(i+1).padStart(2,'0')+'</span>'+codeLines[i].t+'\n';
       }
-      // partial line: approximate by truncating rendered text via a temp element
       var temp = document.createElement('div');
       temp.innerHTML = current.html;
       var full = temp.textContent;
@@ -175,7 +171,6 @@
         for(var i=0; i<node.childNodes.length; i++){
           var child = node.childNodes[i];
           if(remaining <= 0){
-            // remove this and following siblings
             while(node.childNodes[i]){ node.removeChild(node.childNodes[i]); }
             return;
           }
@@ -212,19 +207,60 @@
     typeLines();
   }
 
-  /* ---- contact form ---- */
+  /* ---- contact form: guarda de verdad en Supabase (tabla contactos) ---- */
   var form = document.getElementById('contactForm');
   var submitBtn = document.getElementById('submitBtn');
   var successBox = document.getElementById('formSuccess');
-  form.addEventListener('submit', function(e){
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
     if(!form.checkValidity()){ form.reportValidity(); return; }
+    if(!currentSession || !supabaseClient){
+      // el gate de arriba debería haber interceptado esto antes,
+      // pero por las dudas no dejamos pasar un envío sin sesión.
+      goToLogin('contacto');
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando…';
-    setTimeout(function(){
+
+    var nombre = document.getElementById('fname').value.trim();
+    var email = document.getElementById('femail').value.trim();
+    var plan = document.getElementById('fplan').value;
+    var mensaje = document.getElementById('fmsg').value.trim();
+
+    try {
+      // Buscamos la fila de "clientes" del usuario logueado (la crea
+      // automáticamente el trigger de Supabase apenas se registra).
+      var { data: cliente, error: clienteError } = await supabaseClient
+        .from('clientes')
+        .select('id')
+        .eq('user_id', currentSession.user.id)
+        .single();
+
+      if (clienteError || !cliente) throw clienteError || new Error('No se encontró el cliente');
+
+      var { error: insertError } = await supabaseClient
+        .from('contactos')
+        .insert({
+          cliente_id: cliente.id,
+          nombre: nombre,
+          email: email,
+          plan_interes: plan,
+          mensaje: mensaje,
+          estado: 'nuevo'
+        });
+
+      if (insertError) throw insertError;
+
       form.style.display = 'none';
       successBox.classList.add('show');
-    }, 700);
+    } catch (err) {
+      console.error('Error guardando el contacto:', err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar mensaje';
+      alert('No se pudo enviar el mensaje. Probá de nuevo en un momento.');
+    }
   });
 
   /* ---- plan card magnetic tilt (subtle) ---- */

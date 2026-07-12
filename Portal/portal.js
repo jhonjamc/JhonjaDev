@@ -54,7 +54,7 @@ if (supabaseReady) {
 document.getElementById('logoutBtn').addEventListener('click', async function (e) {
   e.preventDefault();
   if (supabaseReady) await supabaseClient.auth.signOut();
-  window.location.href = '../Login/login.html';
+  window.location.href = '../Index/index.html';
 });
 
 /* ==========================================================

@@ -111,6 +111,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   padding:18px 22px; border-bottom:1px solid var(--border);
   font-family:var(--font-display); font-size:15px; font-weight:700;
   display:flex; justify-content:space-between; align-items:center;
+  gap:10px;
 }
 .table-scroll{ overflow-x:auto; }
 table{ width:100%; border-collapse:collapse; min-width:640px; }
@@ -144,6 +145,19 @@ td.cell-sub{ display:block; font-size:12px; color:var(--text-3); margin-top:2px;
   border-radius:99px; overflow:hidden;
 }
 .progress-fill{ height:100%; background:linear-gradient(90deg, var(--blue), var(--violet)); }
+
+/* ---- botones de accion en las tablas ---- */
+.btn-edit-proyecto, .btn-convertir, .btn-descartar{
+  font-size:12px; font-weight:600; padding:7px 13px; border-radius:8px;
+  border:1px solid var(--border);
+  transition:border-color .2s, background .2s, color .2s;
+}
+.btn-edit-proyecto{ color:var(--blue); }
+.btn-edit-proyecto:hover{ border-color:var(--blue); background:var(--blue-soft); }
+.btn-convertir{ color:var(--green); margin-right:8px; }
+.btn-convertir:hover{ border-color:var(--green); background:var(--green-soft); }
+.btn-descartar{ color:var(--text-3); }
+.btn-descartar:hover{ border-color:var(--red); color:var(--red); background:var(--red-soft); }
 
 /* ---- responsive ---- */
 @media (max-width:900px){

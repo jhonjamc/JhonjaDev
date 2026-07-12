@@ -1,15 +1,29 @@
 /* ==========================================================
+   Supabase — se necesita acá solo para poder cerrar sesión
+   de verdad con supabaseClient.auth.signOut().
+   ========================================================== */
+const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
+
+let supabaseClient = null;
+let supabaseReady = false;
+try {
+  if (window.supabase) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseReady = true;
+  }
+} catch (err) {
+  console.warn('Supabase no está listo:', err.message);
+}
+
+/* ==========================================================
    DATOS DE EJEMPLO
    Con Supabase + Wompi conectados, esto se reemplaza por:
 
-   const { data: pagos } = await supabase
+   const { data: pagos } = await supabaseClient
      .from('pagos')
      .select('id, monto, tipo, estado, referencia_wompi, fecha, clientes(nombre)')
      .order('fecha', { ascending: false });
-
-   El campo `estado` de cada pago lo actualiza automáticamente
-   una Supabase Edge Function que recibe el webhook de Wompi
-   cuando el cliente paga (proyecto, hosting o mensualidad).
    ========================================================== */
 const pagos = [
   { cliente: 'Panadería La Espiga', concepto: 'Plan Pro — 50% inicial', tipo: 'proyecto', monto: 125000, estado: 'pagado',   fecha: '01 jul 2026' },
@@ -70,6 +84,9 @@ function renderTable() {
 renderStats();
 renderTable();
 
-document.getElementById('logoutBtn').addEventListener('click', function (e) {
-  // placeholder — sin sesión real todavía
+/* ---- logout real: cierra la sesión de Supabase y va a Index ---- */
+document.getElementById('logoutBtn').addEventListener('click', async function (e) {
+  e.preventDefault();
+  if (supabaseReady) await supabaseClient.auth.signOut();
+  window.location.href = '../Index/index.html';
 });
