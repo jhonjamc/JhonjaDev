@@ -59,6 +59,7 @@ function translateAuthError(message) {
   if (m.includes('invalid') && m.includes('email')) return 'Ese email no es válido.';
   if (m.includes('rate limit') || m.includes('too many')) return 'Demasiados intentos. Esperá un minuto y probá de nuevo.';
   if (m.includes('signups') && m.includes('disabled')) return 'El registro está deshabilitado en este momento.';
+  if (!message || m === '{}') return 'Ese documento o email ya está registrado, o hubo un problema temporal. Probá de nuevo.';
   // Si no reconocemos el error, mostramos el mensaje real de Supabase
   // en vez de un genérico que no dice nada.
   return message || 'No se pudo crear la cuenta. Probá de nuevo.';
@@ -173,6 +174,29 @@ signupForm.addEventListener('submit', async function (e) {
   const email = document.getElementById('suEmail').value.trim();
   const telefono = document.getElementById('suPhone').value.trim();
   const password = document.getElementById('suPass').value;
+
+  // Chequeamos ANTES de crear la cuenta, así el mensaje es específico
+  // y no dependemos del error genérico que tira Supabase cuando el
+  // trigger de la base de datos falla por un dato repetido.
+  const [{ data: docYaExiste }, { data: emailYaExiste }] = await Promise.all([
+    supabaseClient.rpc('documento_existe', { doc: documento }),
+    supabaseClient.rpc('email_existe', { correo: email }),
+  ]);
+
+  if (docYaExiste) {
+    errorBox.textContent = 'Ese número de documento ya está registrado. Iniciá sesión.';
+    errorBox.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Crear cuenta';
+    return;
+  }
+  if (emailYaExiste) {
+    errorBox.textContent = 'Ya existe una cuenta con ese email. Iniciá sesión.';
+    errorBox.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Crear cuenta';
+    return;
+  }
 
   const { data, error } = await supabaseClient.auth.signUp({
     email,
