@@ -3,8 +3,8 @@
 
   /* ---- auth gate (planes + contacto exigen sesión) ---- */
   // ⚠️ Mismos valores que en Login/login.js — pegá tu URL y anon key reales
-  var SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-  var SUPABASE_ANON_KEY = 'TU-ANON-KEY';
+  var SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
   var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   var currentSession = null;
 

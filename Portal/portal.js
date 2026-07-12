@@ -1,30 +1,44 @@
 // ⚠️ Mismos valores que en Login/login.js — cuando tengas Supabase,
 // pegá acá tu URL y anon key real.
-const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-const SUPABASE_ANON_KEY = 'TU-ANON-KEY';
+const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+let supabaseReady = false;
+try {
+  if (!window.supabase) throw new Error('SDK de Supabase no cargó.');
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseReady = true;
+} catch (err) {
+  console.warn('Supabase no está listo:', err.message);
+}
 
 /* ==========================================================
    GUARD DE SESIÓN
-   Si no hay sesión activa, no se puede ver este panel.
-   Con Supabase real conectado, esto va a funcionar solo.
-   Por ahora (sin credenciales reales) esta llamada falla y
-   redirige a Login — es el comportamiento esperado.
+   Con Supabase real conectado, sin sesión te manda a Login.
+   Si Supabase todavía no está configurado, se muestra el panel
+   igual con datos de ejemplo (modo demo) para que puedas ver
+   el diseño mientras terminás la conexión.
    ========================================================== */
-supabase.auth.getSession().then(({ data }) => {
-  if (!data.session) {
-    window.location.href = '../Login/login.html';
-    return;
-  }
-  document.getElementById('whoLabel').textContent = 'Hola, ' + (data.session.user.user_metadata?.nombre || data.session.user.email) + ' 👋';
-  loadProyecto(data.session.user);
-  loadPagos(data.session.user);
-});
-
+if (supabaseReady) {
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      window.location.href = '../Login/login.html';
+      return;
+    }
+    document.getElementById('whoLabel').textContent =
+      'Hola, ' + (data.session.user.user_metadata?.nombre || data.session.user.email) + ' 👋';
+    loadProyecto();
+    loadPagos();
+  });
+} else {
+  document.getElementById('whoLabel').textContent = 'Hola 👋 (modo demo)';
+  loadProyecto();
+  loadPagos();
+}
 document.getElementById('logoutBtn').addEventListener('click', async function (e) {
   e.preventDefault();
-  await supabase.auth.signOut();
+  if (supabaseReady) await supabase.auth.signOut();
   window.location.href = '../Login/login.html';
 });
 
