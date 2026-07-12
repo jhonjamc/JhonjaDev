@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagos — Panel de gestión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pagos.css">
+</head>
+<body>
+
+<div class="admin-shell">
+  <aside class="sidebar">
+    <a href="../Index/index.html" class="logo"><span>&lt;/&gt;</span> estudio.dev</a>
+    <div class="sidebar-sub">Panel de gestión</div>
+    <nav class="side-nav">
+      <a href="../Proyectos/proyectos.html" class="side-link">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Proyectos</span>
+      </a>
+      <a href="../Pagos/pagos.html" class="side-link active">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v10M9.5 9.5c0-1.1 1.1-2 2.5-2s2.5.9 2.5 2-1.1 1.5-2.5 1.5-2.5.7-2.5 2 1.1 2 2.5 2 2.5-.9 2.5-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Pagos</span>
+      </a>
+      <a href="../Servicios/servicios.html" class="side-link">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M14.7 6.3a4 4 0 01-5.4 5.4L4 17l1.5 1.5 5.3-5.3a4 4 0 015.4-5.4l-2.2 2.2 1.4 1.4 2.2-2.2z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Servicios</span>
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a href="../Login/login.html" class="side-link" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Cerrar sesión</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Gestión</div>
+        <h1 class="page-title">Pagos y ganancias</h1>
+      </div>
+      <div class="demo-badge"><span class="dot"></span> Datos de ejemplo — conectá Supabase + Wompi para ver los reales</div>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="panel">
+      <div class="panel-head">Movimientos</div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Concepto</th>
+              <th>Tipo</th>
+              <th>Monto</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="pagosBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="pagos.js" defer></script>
+</body>
+</html>
