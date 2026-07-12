@@ -44,7 +44,7 @@ let supabaseReady = false;
 
 try {
   if (!window.supabase) throw new Error('SDK de Supabase no cargó (revisá tu conexión a internet).');
-  if (SUPABASE_URL.includes('TU-PROYECTO') || SUPABASE_ANON_KEY.includes('TU-ANON-KEY')) {
+  if (SUPABASE_URL.includes('https://ydpvldprmcllxiifvcmq.supabase.co') || SUPABASE_ANON_KEY.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao')) {
     throw new Error('Todavía no configuraste tu proyecto real de Supabase en este archivo.');
   }
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
