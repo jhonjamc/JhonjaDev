@@ -53,6 +53,8 @@ const ADMIN_EMAIL = 'jhonjamoguea@icloud.com';
 function translateAuthError(message) {
   const m = (message || '').toLowerCase();
   if (m.includes('already registered') || m.includes('already exists')) return 'Ya existe una cuenta con ese email. Iniciá sesión.';
+  if (m.includes('duplicate') && m.includes('documento')) return 'Ese número de documento ya está registrado.';
+  if (m.includes('duplicate')) return 'Ese documento o email ya está registrado.';
   if (m.includes('password')) return 'La contraseña debe tener al menos 6 caracteres.';
   if (m.includes('invalid') && m.includes('email')) return 'Ese email no es válido.';
   if (m.includes('rate limit') || m.includes('too many')) return 'Demasiados intentos. Esperá un minuto y probá de nuevo.';
@@ -82,25 +84,6 @@ function showConfigWarning(message) {
   document.querySelector('.login-card').prepend(notice);
 }
 
-/* ==========================================================
-   Recomendado en Supabase (SQL Editor), para que cada cliente
-   que se registra desde acá tenga automáticamente su fila en
-   la tabla `clientes`, vinculada a su usuario de Auth:
-
-   create function public.handle_new_user()
-   returns trigger as $$
-   begin
-     insert into public.clientes (user_id, nombre, email)
-     values (new.id, new.raw_user_meta_data->>'nombre', new.email);
-     return new;
-   end;
-   $$ language plpgsql security definer;
-
-   create trigger on_auth_user_created
-     after insert on auth.users
-     for each row execute procedure public.handle_new_user();
-   ========================================================== */
-
 function routeAfterAuth(user) {
   if (selectedPlan) sessionStorage.setItem('planSeleccionado', selectedPlan);
 
@@ -122,7 +105,7 @@ if (supabaseReady) {
   });
 }
 
-/* ---- iniciar sesión ---- */
+/* ---- iniciar sesión (documento + contraseña) ---- */
 signinForm.addEventListener('submit', async function (e) {
   e.preventDefault();
   const errorBox = document.getElementById('signinError');
@@ -138,8 +121,20 @@ signinForm.addEventListener('submit', async function (e) {
   btn.disabled = true;
   btn.textContent = 'Ingresando…';
 
-  const email = document.getElementById('siEmail').value.trim();
+  const documento = document.getElementById('siDocumento').value.trim();
   const password = document.getElementById('siPass').value;
+
+  // Supabase Auth solo entiende email+password. Acá resolvemos
+  // "documento" al email real usando la función SQL email_por_documento.
+  const { data: email, error: lookupError } = await supabaseClient.rpc('email_por_documento', { doc: documento });
+
+  if (lookupError || !email) {
+    errorBox.textContent = 'No encontramos una cuenta con ese número de documento.';
+    errorBox.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+    return;
+  }
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
@@ -147,7 +142,7 @@ signinForm.addEventListener('submit', async function (e) {
     const m = (error.message || '').toLowerCase();
     errorBox.textContent = m.includes('email not confirmed')
       ? 'Confirmá tu email antes de ingresar (revisá tu bandeja de entrada).'
-      : 'Email o contraseña incorrectos.';
+      : 'Documento o contraseña incorrectos.';
     errorBox.classList.add('show');
     btn.disabled = false;
     btn.textContent = 'Ingresar';
@@ -174,13 +169,15 @@ signupForm.addEventListener('submit', async function (e) {
   btn.textContent = 'Creando cuenta…';
 
   const nombre = document.getElementById('suName').value.trim();
+  const documento = document.getElementById('suDocumento').value.trim();
   const email = document.getElementById('suEmail').value.trim();
+  const telefono = document.getElementById('suPhone').value.trim();
   const password = document.getElementById('suPass').value;
 
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
-    options: { data: { nombre: nombre, role: 'cliente' } }
+    options: { data: { nombre, documento, telefono, role: 'cliente' } }
   });
 
   btn.disabled = false;
@@ -194,7 +191,6 @@ signupForm.addEventListener('submit', async function (e) {
   }
 
   if (!data.session) {
-    // Reemplaza el alert() nativo por el bloque de éxito integrado al diseño
     signupSuccessMsg.textContent = 'Revisá tu email para confirmar tu cuenta antes de ingresar.';
     authTabs.style.display = 'none';
     signupForm.style.display = 'none';

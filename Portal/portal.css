@@ -23,17 +23,21 @@
   --ease:cubic-bezier(.16,1,.3,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{ background:var(--bg); color:var(--text-1); font-family:var(--font-body); font-size:15px; }
+body{
+  background:var(--bg); color:var(--text-1); font-family:var(--font-body); font-size:15px;
+  display:flex; flex-direction:column; align-items:center;
+  min-height:100vh;
+}
 a{ color:inherit; text-decoration:none; }
 
-.container{ max-width:960px; margin:0 auto; padding:0 32px 100px; }
+.container{ width:100%; max-width:840px; margin:0 auto; padding:0 32px 100px; }
 
 .topnav{
   display:flex; align-items:center; justify-content:space-between;
   padding:20px 32px; border-bottom:1px solid var(--border-soft);
   margin-bottom:48px;
-  max-width:960px;
-  margin-left:auto; margin-right:auto;
+  width:100%;
+  max-width:840px;
 }
 .logo{ display:flex; align-items:center; gap:9px; font-family:var(--font-mono); font-weight:600; font-size:15px; }
 .logo span{ color:var(--blue); }

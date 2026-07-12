@@ -19,12 +19,12 @@
       <button class="tab" id="tabSignup" type="button">Crear cuenta</button>
     </div>
 
-    <!-- ---- INICIAR SESIÓN ---- -->
+    <!-- ---- INICIAR SESIÓN (documento + contraseña) ---- -->
     <form id="signinForm" class="auth-form">
-      <p class="sub">Entrá para ver el progreso de tu proyecto y tus pagos.</p>
+      <p class="sub">Entrá con tu número de documento para ver el progreso de tu proyecto y tus pagos.</p>
       <div class="form-group">
-        <label for="siEmail">Email</label>
-        <input type="email" id="siEmail" placeholder="tu@email.com" required>
+        <label for="siDocumento">Número de documento</label>
+        <input type="text" id="siDocumento" inputmode="numeric" placeholder="Ej: 1035678900" required>
       </div>
       <div class="form-group">
         <label for="siPass">Contraseña</label>
@@ -38,12 +38,20 @@
     <form id="signupForm" class="auth-form" style="display:none;">
       <p class="sub">Creá tu cuenta para hacer seguimiento a tu proyecto.</p>
       <div class="form-group">
-        <label for="suName">Nombre</label>
-        <input type="text" id="suName" placeholder="Tu nombre o el de tu negocio" required>
+        <label for="suName">Nombre y apellidos</label>
+        <input type="text" id="suName" placeholder="Tu nombre completo" required>
       </div>
       <div class="form-group">
-        <label for="suEmail">Email</label>
+        <label for="suDocumento">Número de documento</label>
+        <input type="text" id="suDocumento" inputmode="numeric" placeholder="Ej: 1035678900" required>
+      </div>
+      <div class="form-group">
+        <label for="suEmail">Correo electrónico</label>
         <input type="email" id="suEmail" placeholder="tu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="suPhone">Número de celular</label>
+        <input type="tel" id="suPhone" inputmode="tel" placeholder="Ej: 3001234567" required>
       </div>
       <div class="form-group">
         <label for="suPass">Contraseña</label>
@@ -53,7 +61,7 @@
       <button type="submit" class="submit-btn" id="signupBtn">Crear cuenta</button>
     </form>
 
-    <!-- ---- ÉXITO AL CREAR CUENTA (reemplaza el alert()) ---- -->
+    <!-- ---- ÉXITO AL CREAR CUENTA ---- -->
     <div class="signup-success" id="signupSuccess">
       <div class="success-icon">
         <svg width="20" height="20" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
