@@ -1,37 +1,26 @@
-/* ==========================================================
-   Supabase — se necesita acá solo para poder cerrar sesión
-   de verdad con supabaseClient.auth.signOut().
-   ========================================================== */
 const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
+const ADMIN_EMAIL = 'jhonjamoguea@icloud.com';
 
 let supabaseClient = null;
-let supabaseReady = false;
 try {
-  if (window.supabase) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    supabaseReady = true;
-  }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } catch (err) {
-  console.warn('Supabase no está listo:', err.message);
+  console.error('No se pudo iniciar Supabase:', err.message);
 }
 
-/* ==========================================================
-   DATOS DE EJEMPLO
-   Con Supabase conectado, esto se reemplaza por:
+async function checkAdminAccess() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data.session) { window.location.href = '../Login/login.html'; return false; }
+  if ((data.session.user.email || '').toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    window.location.href = '../Portal/portal.html';
+    return false;
+  }
+  return true;
+}
 
-   const { data: solicitudes } = await supabaseClient
-     .from('solicitudes_servicio')
-     .select('id, servicio, monto, estado, fecha, clientes(nombre)')
-     .order('fecha', { ascending: false });
-   ========================================================== */
-const solicitudes = [
-  { cliente: 'Panadería La Espiga', servicio: 'Integración WhatsApp', monto: 30000, estado: 'pendiente', fecha: '09 jul 2026' },
-  { cliente: 'Ferretería El Tornillo', servicio: 'Nueva sección — catálogo', monto: 50000, estado: 'en_revision', fecha: '08 jul 2026' },
-  { cliente: 'Gimnasio PowerFit', servicio: 'Rediseño parcial', monto: 100000, estado: 'aprobada', fecha: '05 jul 2026' },
-  { cliente: 'Clínica Dental Sonrisa', servicio: 'Formulario con Supabase', monto: 80000, estado: 'pendiente', fecha: '11 jul 2026' },
-  { cliente: 'Café Andina', servicio: 'Actualización de contenido', monto: 40000, estado: 'completada', fecha: '30 jun 2026' },
-];
+function fmt(n) { return '$' + Number(n || 0).toLocaleString('es-CO'); }
+function today() { return new Date().toISOString().slice(0, 10); }
 
 const ESTADOS = {
   pendiente:   { label: 'Pendiente',   badge: 'badge-amber'  },
@@ -39,17 +28,33 @@ const ESTADOS = {
   aprobada:    { label: 'Aprobada',    badge: 'badge-blue'   },
   completada:  { label: 'Completada',  badge: 'badge-green'  },
 };
+const ESTADOS_KEYS = Object.keys(ESTADOS);
 
-function fmt(n) {
-  return '$' + n.toLocaleString('es-CO');
+let solicitudesCache = [];
+
+async function loadSolicitudes() {
+  const { data, error } = await supabaseClient
+    .from('solicitudes_servicio')
+    .select('id, cliente_id, servicio, monto, estado, fecha, clientes(nombre)')
+    .order('fecha', { ascending: false });
+
+  if (error) {
+    console.error('Error cargando solicitudes:', error);
+    document.getElementById('serviciosBody').innerHTML = `<tr><td colspan="6">No se pudieron cargar las solicitudes.</td></tr>`;
+    return;
+  }
+
+  solicitudesCache = data || [];
+  renderStats();
+  renderTable();
 }
 
 function renderStats() {
-  const pendientes = solicitudes.filter(s => s.estado === 'pendiente').length;
-  const enCurso = solicitudes.filter(s => s.estado === 'en_revision' || s.estado === 'aprobada').length;
-  const valorPotencial = solicitudes
+  const pendientes = solicitudesCache.filter(s => s.estado === 'pendiente').length;
+  const enCurso = solicitudesCache.filter(s => s.estado === 'en_revision' || s.estado === 'aprobada').length;
+  const valorPotencial = solicitudesCache
     .filter(s => s.estado !== 'completada')
-    .reduce((sum, s) => sum + s.monto, 0);
+    .reduce((sum, s) => sum + Number(s.monto || 0), 0);
 
   document.getElementById('statsRow').innerHTML = `
     <div class="stat-card"><div class="label">Pendientes de revisar</div><div class="value">${pendientes}</div></div>
@@ -59,27 +64,82 @@ function renderStats() {
 }
 
 function renderTable() {
-  const rows = solicitudes.map(s => {
-    const e = ESTADOS[s.estado];
+  if (solicitudesCache.length === 0) {
+    document.getElementById('serviciosBody').innerHTML = `<tr><td colspan="6">Todavía no hay solicitudes.</td></tr>`;
+    return;
+  }
+  const rows = solicitudesCache.map(s => {
+    const e = ESTADOS[s.estado] || ESTADOS.pendiente;
     return `
       <tr>
-        <td class="cell-primary">${s.cliente}</td>
-        <td>${s.servicio}</td>
+        <td class="cell-primary">${s.clientes?.nombre || '(sin nombre)'}</td>
+        <td>${s.servicio || '—'}</td>
         <td>${fmt(s.monto)}</td>
         <td><span class="badge ${e.badge}">${e.label}</span></td>
-        <td>${s.fecha}</td>
+        <td>${s.fecha || '—'}</td>
+        <td>
+          <button type="button" class="btn-edit-proyecto" data-id="${s.id}" data-estado="${s.estado}">Cambiar estado</button>
+          ${s.estado !== 'completada' ? `<button type="button" class="btn-pagar" data-id="${s.id}" data-cliente="${s.cliente_id}" data-servicio="${s.servicio}" data-monto="${s.monto}">Marcar pagado</button>` : ''}
+        </td>
       </tr>
     `;
   }).join('');
   document.getElementById('serviciosBody').innerHTML = rows;
+
+  document.querySelectorAll('.btn-edit-proyecto').forEach(btn => {
+    btn.addEventListener('click', () => cambiarEstado(btn.dataset.id, btn.dataset.estado));
+  });
+  document.querySelectorAll('.btn-pagar').forEach(btn => {
+    btn.addEventListener('click', () => marcarPagado(btn.dataset.id, btn.dataset.cliente, btn.dataset.servicio, btn.dataset.monto));
+  });
 }
 
-renderStats();
-renderTable();
+async function cambiarEstado(id, estadoActual) {
+  const nuevo = prompt(`Nuevo estado (${ESTADOS_KEYS.join(' / ')}):`, estadoActual);
+  if (nuevo === null) return;
+  if (!ESTADOS_KEYS.includes(nuevo)) { alert('Estado inválido.'); return; }
 
-/* ---- logout real: cierra la sesión de Supabase y va a Index ---- */
+  const { error } = await supabaseClient.from('solicitudes_servicio').update({ estado: nuevo }).eq('id', id);
+  if (error) { console.error(error); alert('No se pudo actualizar.'); return; }
+  loadSolicitudes();
+}
+
+/* ---- marcar como pagado: registra el pago Y completa la solicitud ---- */
+async function marcarPagado(solicitudId, clienteId, servicio, monto) {
+  if (!confirm(`¿Confirmás que "${servicio}" ($${Number(monto).toLocaleString('es-CO')}) ya fue pagado?`)) return;
+
+  const metodo_pago = prompt('Forma de pago (transferencia / efectivo / wompi / otro):', 'transferencia');
+  if (metodo_pago === null) return;
+
+  const { error: pagoError } = await supabaseClient.from('pagos').insert({
+    cliente_id: clienteId,
+    concepto: servicio,
+    monto: Number(monto),
+    tipo: 'servicio_adicional',
+    metodo_pago: metodo_pago.trim(),
+    estado: 'pagado',
+    fecha: today(),
+  });
+  if (pagoError) { console.error(pagoError); alert('No se pudo registrar el pago.'); return; }
+
+  const { error: solError } = await supabaseClient
+    .from('solicitudes_servicio')
+    .update({ estado: 'completada' })
+    .eq('id', solicitudId);
+  if (solError) console.error('Se registró el pago pero no se pudo marcar la solicitud como completada:', solError);
+
+  loadSolicitudes();
+}
+
+/* ---- init ---- */
+(async function init() {
+  const ok = await checkAdminAccess();
+  if (!ok) return;
+  loadSolicitudes();
+})();
+
 document.getElementById('logoutBtn').addEventListener('click', async function (e) {
   e.preventDefault();
-  if (supabaseReady) await supabaseClient.auth.signOut();
+  await supabaseClient.auth.signOut();
   window.location.href = '../Index/index.html';
 });

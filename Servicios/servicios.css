@@ -145,6 +145,20 @@ td.cell-sub{ display:block; font-size:12px; color:var(--text-3); margin-top:2px;
 }
 .progress-fill{ height:100%; background:linear-gradient(90deg, var(--blue), var(--violet)); }
 
+/* ---- botones de accion ---- */
+.btn-edit-proyecto{
+  font-size:12px; font-weight:600; padding:7px 13px; border-radius:8px;
+  border:1px solid var(--border); color:var(--blue); margin-right:6px;
+  transition:border-color .2s, background .2s;
+}
+.btn-edit-proyecto:hover{ border-color:var(--blue); background:var(--blue-soft); }
+.btn-pagar{
+  font-size:12px; font-weight:600; padding:7px 13px; border-radius:8px;
+  border:1px solid var(--border); color:var(--green);
+  transition:border-color .2s, background .2s;
+}
+.btn-pagar:hover{ border-color:var(--green); background:var(--green-soft); }
+
 /* ---- responsive ---- */
 @media (max-width:900px){
   .sidebar{

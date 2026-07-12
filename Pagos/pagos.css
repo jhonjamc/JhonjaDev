@@ -111,6 +111,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   padding:18px 22px; border-bottom:1px solid var(--border);
   font-family:var(--font-display); font-size:15px; font-weight:700;
   display:flex; justify-content:space-between; align-items:center;
+  gap:12px;
 }
 .table-scroll{ overflow-x:auto; }
 table{ width:100%; border-collapse:collapse; min-width:640px; }
@@ -145,6 +146,20 @@ td.cell-sub{ display:block; font-size:12px; color:var(--text-3); margin-top:2px;
 }
 .progress-fill{ height:100%; background:linear-gradient(90deg, var(--blue), var(--violet)); }
 
+/* ---- botones de accion ---- */
+.btn-accion{
+  font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:999px;
+  background:linear-gradient(120deg, var(--blue), var(--violet)); color:#080b12;
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.btn-accion:hover{ transform:translateY(-1px); box-shadow:0 10px 24px -10px rgba(79,140,255,.5); }
+.btn-edit-proyecto{
+  font-size:12px; font-weight:600; padding:7px 13px; border-radius:8px;
+  border:1px solid var(--border); color:var(--blue);
+  transition:border-color .2s, background .2s;
+}
+.btn-edit-proyecto:hover{ border-color:var(--blue); background:var(--blue-soft); }
+
 /* ---- responsive ---- */
 @media (max-width:900px){
   .sidebar{
@@ -160,4 +175,5 @@ td.cell-sub{ display:block; font-size:12px; color:var(--text-3); margin-top:2px;
   .side-foot{ margin-top:0; padding-top:0; border-top:none; margin-left:8px; }
   .main{ margin-left:0; margin-top:64px; padding:32px 20px 60px; }
   table{ min-width:560px; }
+  .panel-head{ flex-wrap:wrap; }
 }

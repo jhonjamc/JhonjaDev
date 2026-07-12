@@ -83,7 +83,10 @@ function renderProyectos(proyectos) {
         <td>
           <div class="progress-track"><div class="progress-fill" style="width:${p.progreso || 0}%"></div></div>
         </td>
-        <td><button type="button" class="btn-edit-proyecto" data-id="${p.id}" data-progreso="${p.progreso || 0}" data-estado="${p.estado}">Editar</button></td>
+        <td>
+          <button type="button" class="btn-ver-detalle" data-id="${p.id}">Ver detalles</button>
+          <button type="button" class="btn-edit-proyecto" data-id="${p.id}" data-progreso="${p.progreso || 0}" data-estado="${p.estado}">Editar</button>
+        </td>
       </tr>
     `;
   }).join('');
@@ -91,6 +94,9 @@ function renderProyectos(proyectos) {
 
   document.querySelectorAll('.btn-edit-proyecto').forEach(btn => {
     btn.addEventListener('click', () => editProyecto(btn.dataset.id, btn.dataset.progreso, btn.dataset.estado));
+  });
+  document.querySelectorAll('.btn-ver-detalle').forEach(btn => {
+    btn.addEventListener('click', () => verDetalleProyecto(btn.dataset.id));
   });
 }
 
@@ -219,6 +225,68 @@ async function descartarContacto(contactoId) {
     .eq('id', contactoId);
   if (error) console.error('Error descartando contacto:', error);
   loadContactos();
+}
+
+/* ---- detalle del proyecto: cliente + pagos + solicitudes ---- */
+const detailOverlay = document.getElementById('detailOverlay');
+const detailContent = document.getElementById('detailContent');
+document.getElementById('detailClose').addEventListener('click', () => detailOverlay.classList.remove('show'));
+detailOverlay.addEventListener('click', (e) => { if (e.target === detailOverlay) detailOverlay.classList.remove('show'); });
+
+async function verDetalleProyecto(proyectoId) {
+  detailContent.innerHTML = 'Cargando…';
+  detailOverlay.classList.add('show');
+
+  const { data: proyecto, error } = await supabaseClient
+    .from('proyectos')
+    .select('id, plan, estado, fecha_entrega, progreso, cliente_id, clientes(nombre, email, telefono, documento)')
+    .eq('id', proyectoId)
+    .single();
+
+  if (error || !proyecto) {
+    detailContent.innerHTML = '<p>No se pudo cargar el detalle.</p>';
+    return;
+  }
+
+  const [{ data: pagos }, { data: solicitudes }] = await Promise.all([
+    supabaseClient.from('pagos').select('concepto, monto, estado, metodo_pago, fecha').eq('cliente_id', proyecto.cliente_id).order('fecha', { ascending: false }),
+    supabaseClient.from('solicitudes_servicio').select('servicio, monto, estado, fecha').eq('cliente_id', proyecto.cliente_id).order('fecha', { ascending: false }),
+  ]);
+
+  const c = proyecto.clientes || {};
+  const e = ESTADOS[proyecto.estado] || ESTADOS.pendiente;
+  const entrega = proyecto.fecha_entrega
+    ? new Date(proyecto.fecha_entrega + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
+
+  const pagosHtml = (pagos && pagos.length)
+    ? pagos.map(p => `<li>${p.concepto} — $${Number(p.monto).toLocaleString('es-CO')} <span class="badge ${p.estado === 'pagado' ? 'badge-green' : 'badge-amber'}">${p.estado}</span></li>`).join('')
+    : '<li class="muted">Sin pagos registrados todavía.</li>';
+
+  const solicitudesHtml = (solicitudes && solicitudes.length)
+    ? solicitudes.map(s => `<li>${s.servicio} — $${Number(s.monto).toLocaleString('es-CO')} <span class="badge badge-violet">${s.estado}</span></li>`).join('')
+    : '<li class="muted">Sin solicitudes de servicio adicional.</li>';
+
+  detailContent.innerHTML = `
+    <h2>${c.nombre || '(sin nombre)'}</h2>
+    <div class="detail-grid">
+      <div><span class="mono">Email</span><strong>${c.email || '—'}</strong></div>
+      <div><span class="mono">Documento</span><strong>${c.documento || '—'}</strong></div>
+      <div><span class="mono">Celular</span><strong>${c.telefono || '—'}</strong></div>
+    </div>
+    <hr>
+    <div class="detail-grid">
+      <div><span class="mono">Plan</span><strong>${proyecto.plan || '—'}</strong></div>
+      <div><span class="mono">Estado</span><span class="badge ${e.badge}">${e.label}</span></div>
+      <div><span class="mono">Entrega</span><strong>${entrega}</strong></div>
+      <div><span class="mono">Progreso</span><strong>${proyecto.progreso || 0}%</strong></div>
+    </div>
+    <hr>
+    <h3>Pagos de este cliente</h3>
+    <ul class="detail-list">${pagosHtml}</ul>
+    <h3>Servicios adicionales solicitados</h3>
+    <ul class="detail-list">${solicitudesHtml}</ul>
+  `;
 }
 
 /* ---- init ---- */
