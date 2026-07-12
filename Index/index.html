@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jhonja Dev — Desarrollo y diseño a medida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="index.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- ============ NAV ============ -->
+<header id="siteHeader">
+  <div class="container nav">
+    <a href="#top" class="logo"><span>&lt;/&gt;</span> jhonja.dev</a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#sobre-mi">Sobre mí</a>
+      <a href="#planes">Planes</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#contacto">Contacto</a>
+      <a href="../Login/login.html" class="nav-login-mobile">Iniciar sesión</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="../Login/login.html" class="btn btn-ghost">Iniciar sesión</a>
+      <a href="#contacto" class="btn btn-primary" data-gate="contacto">Pedir presupuesto</a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-tag reveal is-visible"><span class="dot"></span> Disponible para nuevos proyectos</div>
+      <h1 class="reveal is-visible">Tu negocio no crece <em>sin una web</em> que trabaje tan duro como vos</h1>
+      <p class="lead reveal is-visible">Diseño y programo sitios rápidos, seguros y a medida — desde una landing simple hasta plataformas con base de datos. Código limpio, sin plantillas genéricas, pensado para convertir visitas en clientes.</p>
+      <div class="hero-ctas reveal is-visible">
+        <a href="#contacto" class="btn btn-primary">Trabajemos juntos →</a>
+        <a href="#planes" class="btn btn-ghost">Ver planes y precios</a>
+      </div>
+      <div class="hero-meta reveal is-visible">
+        <div><span class="num">3</span><span class="label">PLANES A MEDIDA</span></div>
+        <div><span class="num">7–30</span><span class="label">DÍAS DE ENTREGA</span></div>
+        <div><span class="num">100%</span><span class="label">RESPONSIVE</span></div>
+      </div>
+    </div>
+
+    <div class="code-window reveal is-visible" id="codeWindow">
+      <div class="code-titlebar">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <div class="code-filename">proyecto-cliente.html</div>
+      </div>
+      <div class="code-body" id="codeBody"></div>
+      <div class="preview-pane" id="previewPane">
+        <div class="preview-inner">
+          <div class="preview-nav">
+            <div class="preview-logo">tunegocio<span style="color:var(--blue)">.co</span></div>
+            <div class="preview-btn">Contactar</div>
+          </div>
+          <div class="preview-h">Hola, somos <span>tu negocio.</span></div>
+          <p class="preview-p">Una web hecha para que tus clientes te encuentren, confíen y te elijan.</p>
+          <div class="preview-bars"><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="section" id="sobre-mi">
+  <div class="container about-grid">
+    <div class="avatar-card reveal">
+      <div class="avatar-frame">DEV</div>
+      <div class="avatar-tags">
+        <span class="tag-pill"><span class="sq" style="background:var(--blue)"></span>HTML5</span>
+        <span class="tag-pill"><span class="sq" style="background:var(--blue)"></span>CSS3</span>
+        <span class="tag-pill"><span class="sq" style="background:var(--green)"></span>JavaScript</span>
+        <span class="tag-pill"><span class="sq" style="background:var(--violet)"></span>Supabase</span>
+      </div>
+    </div>
+    <div class="about-copy reveal">
+      <div class="eyebrow">Sobre mí</div>
+      <h2>Construyo la web que tu negocio necesita, no la que sobra en una plantilla</h2>
+      <p>Soy desarrollador y diseñador web. Trabajo directamente con cada cliente para entender el negocio antes de escribir una sola línea de código: quién es su cliente ideal, qué necesita mostrar primero y qué acción quiero que tome al llegar a la página.</p>
+      <p>Me apasiona el detalle — <strong>una animación que se siente natural, un botón que responde bien al toque, una carga rápida en el celular.</strong> Eso es lo que separa una web que solo existe de una que realmente genera resultados.</p>
+      <p>Trabajo con <strong>HTML, CSS y JavaScript</strong> puro para sitios livianos y rápidos, y con <strong>Supabase</strong> cuando el proyecto necesita base de datos, formularios conectados o un panel de administración.</p>
+      <div class="principles">
+        <div class="principle"><span class="mono">01</span><p>Código limpio y liviano. Sin librerías innecesarias que frenen tu web.</p></div>
+        <div class="principle"><span class="mono">02</span><p>Diseño a medida. Cada sección se piensa para tu marca, no para un molde.</p></div>
+        <div class="principle"><span class="mono">03</span><p>Comunicación directa. Vos sabés en qué etapa está tu proyecto, siempre.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="section" id="planes">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <div class="eyebrow">Planes</div>
+        <h2>Un plan para cada etapa de tu negocio</h2>
+      </div>
+      <p>Precios claros, pago único, sin letra chica. Elegí el que se ajuste a lo que tu proyecto necesita hoy.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- PLAN PRO -->
+      <div class="plan plan-pro reveal">
+        <div class="plan-name">Plan Pro</div>
+        <div class="plan-desc">Ideal para negocios que necesitan tener presencia online.</div>
+        <div class="plan-price"><span class="amount">$250.000</span></div>
+        <div class="plan-unit">Pago único</div>
+        <ul class="plan-features">
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Landing page o página informativa</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Diseño personalizado</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>HTML, CSS y JavaScript</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Responsive para celular y PC</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Hasta <b>5 secciones</b></li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Formulario de contacto</li>
+        </ul>
+        <a href="#contacto" class="plan-cta" data-gate="planes" data-plan="pro">Elegir Plan Pro</a>
+      </div>
+
+      <!-- PLAN PLUS -->
+      <div class="plan plan-plus reveal">
+        <div class="plan-name">Plan Plus</div>
+        <div class="plan-desc">Página web con base de datos y más funcionalidades.</div>
+        <div class="plan-price"><span class="amount">$450.000</span></div>
+        <div class="plan-unit">Pago único</div>
+        <ul class="plan-features">
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Todo lo del Plan Pro</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Integración con <b>Supabase</b></li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Formularios conectados a base de datos</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Panel básico de administración</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Hasta <b>10 secciones</b></li>
+        </ul>
+        <a href="#contacto" class="plan-cta" data-gate="planes" data-plan="plus">Elegir Plan Plus</a>
+      </div>
+
+      <!-- PLAN PREMIUM -->
+      <div class="plan plan-premium reveal">
+        <div class="plan-badge">3 meses soporte</div>
+        <div class="plan-name">Plan Premium</div>
+        <div class="plan-desc">Solución completa para negocios que quieren escalar.</div>
+        <div class="plan-price"><span class="amount">$700.000</span></div>
+        <div class="plan-unit">Pago único</div>
+        <ul class="plan-features">
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Todo lo del Plan Plus</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Base de datos avanzada</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Múltiples formularios</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Optimización y SEO básico</li>
+          <li><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>3 meses</b> de soporte y ajustes</li>
+        </ul>
+        <a href="#contacto" class="plan-cta" data-gate="planes" data-plan="premium">Elegir Plan Premium</a>
+      </div>
+    </div>
+
+    <!-- ADDONS -->
+    <div class="addons reveal" id="servicios">
+      <div class="addons-label">Servicios adicionales</div>
+      <div class="addons-grid">
+        <div class="addon"><span class="aname">Hosting + dominio anual</span><span class="aprice">$150.000</span></div>
+        <div class="addon"><span class="aname">Mantenimiento mensual</span><span class="aprice">$50.000</span></div>
+        <div class="addon"><span class="aname">Actualización de contenido</span><span class="aprice">$40.000</span></div>
+        <div class="addon"><span class="aname">Mejoras pequeñas</span><span class="aprice">$50.000</span></div>
+        <div class="addon"><span class="aname">Rediseño parcial</span><span class="aprice">$100.000</span></div>
+        <div class="addon"><span class="aname">Rediseño completo</span><span class="aprice">$200.000</span></div>
+        <div class="addon"><span class="aname">Nueva sección</span><span class="aprice">$50.000</span></div>
+        <div class="addon"><span class="aname">Integración WhatsApp</span><span class="aprice">$30.000</span></div>
+        <div class="addon"><span class="aname">Formulario con Supabase</span><span class="aprice">$80.000</span></div>
+      </div>
+    </div>
+
+    <!-- TERMS -->
+    <div class="terms-grid reveal">
+      <div class="term-card">
+        <h3>Forma de pago</h3>
+        <div class="term-row"><span class="badge">50%</span> 50% para iniciar el proyecto</div>
+        <div class="term-row"><span class="badge" style="color:var(--green); background:var(--green-soft);">✓</span> 50% al entregar el proyecto</div>
+        <p class="term-note">El dominio, hosting y servicios de terceros se pagan por adelantado cuando sean requeridos.</p>
+      </div>
+      <div class="term-card">
+        <h3>Tiempo de entrega</h3>
+        <div class="term-row"><span class="badge">1s</span> 1 semana — Plan Pro</div>
+        <div class="term-row"><span class="badge" style="color:var(--green); background:var(--green-soft);">2s</span> 2 semanas — Plan Plus</div>
+        <div class="term-row"><span class="badge" style="color:var(--violet); background:var(--violet-soft);">4s</span> 3 a 4 semanas — Plan Premium</div>
+        <p class="term-note">Entrega estimada de 7 a 30 días hábiles según la complejidad del proyecto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="section" id="contacto">
+  <div class="container">
+    <div class="contact-wrap reveal">
+      <div class="contact-copy">
+        <div class="eyebrow">Contacto</div>
+        <h2>Contame sobre tu proyecto</h2>
+        <p>Completá el formulario con un par de datos y te respondo con una propuesta a medida. También podés escribirme directo.</p>
+        <div class="contact-direct">
+          <a href="mailto:hola@estudio.dev"><span class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6l9 7 9-7M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6"/></svg></span> hola@estudio.dev</a>
+          <a href="#"><span class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 20l1.5-4.5A8 8 0 1112 20a8 8 0 01-4.5-1.5L3 20z" stroke="currentColor" stroke-width="1.6"/></svg></span> +54 9 11 0000 0000</a>
+        </div>
+      </div>
+
+      <div>
+        <form id="contactForm" data-gate="contacto">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fname">Nombre</label>
+              <input type="text" id="fname" name="fname" placeholder="Tu nombre" required>
+            </div>
+            <div class="form-group">
+              <label for="femail">Email</label>
+              <input type="email" id="femail" name="femail" placeholder="tu@email.com" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="fplan">Plan de interés</label>
+            <select id="fplan" name="fplan">
+              <option>Plan Pro — $250.000</option>
+              <option>Plan Plus — $450.000</option>
+              <option>Plan Premium — $700.000</option>
+              <option>No estoy seguro / quiero asesoría</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fmsg">Contame sobre tu negocio</label>
+            <textarea id="fmsg" name="fmsg" placeholder="¿Qué tipo de negocio tenés y qué necesitás para tu web?" required></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">Enviar mensaje</button>
+        </form>
+        <div class="form-success" id="formSuccess">
+          <div class="check-big"><svg width="20" height="20" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>¡Mensaje enviado!</h3>
+          <p>Gracias por escribirme. Voy a revisar tu proyecto y te respondo dentro de las próximas 24 horas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container footer-row">
+    <a href="#top" class="logo"><span>&lt;/&gt;</span> jhonja.dev</a>
+    <div class="footer-tech">
+      <span>HTML5</span><span>CSS3</span><span>JavaScript</span><span>Supabase</span>
+    </div>
+    <div class="footer-copy">© 2026 jhonja.dev — Todos los derechos reservados.</div>
+    <a href="#top" class="back-top" aria-label="Volver arriba">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</footer>
+
+<script src="index.js" defer></script>
+</body>
+</html>
