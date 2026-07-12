@@ -3,11 +3,19 @@
 const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
 
-let supabase = null;
+/* ==========================================================
+   ⚠️ Importante: la variable NO se llama "supabase" porque el
+   SDK del CDN (<script src=".../supabase-js@2">) ya crea una
+   variable global con ese nombre. Si acá también se declara
+   "let supabase", el navegador tira:
+   "Identifier 'supabase' has already been declared"
+   y se rompe TODO el script de la página (por eso nada andaba).
+   ========================================================== */
+let supabaseClient = null;
 let supabaseReady = false;
 try {
   if (!window.supabase) throw new Error('SDK de Supabase no cargó.');
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   supabaseReady = true;
 } catch (err) {
   console.warn('Supabase no está listo:', err.message);
@@ -21,7 +29,7 @@ try {
    el diseño mientras terminás la conexión.
    ========================================================== */
 if (supabaseReady) {
-  supabase.auth.getSession().then(({ data }) => {
+  supabaseClient.auth.getSession().then(({ data }) => {
     if (!data.session) {
       window.location.href = '../Login/login.html';
       return;
@@ -38,7 +46,7 @@ if (supabaseReady) {
 }
 document.getElementById('logoutBtn').addEventListener('click', async function (e) {
   e.preventDefault();
-  if (supabaseReady) await supabase.auth.signOut();
+  if (supabaseReady) await supabaseClient.auth.signOut();
   window.location.href = '../Login/login.html';
 });
 
@@ -46,7 +54,7 @@ document.getElementById('logoutBtn').addEventListener('click', async function (e
    DATOS DE EJEMPLO — MI PROYECTO
    Con Supabase conectado:
 
-   const { data: proyecto } = await supabase
+   const { data: proyecto } = await supabaseClient
      .from('proyectos')
      .select('plan, estado, fecha_entrega, progreso, clientes(nombre)')
      .eq('cliente_id', clienteIdDelUsuarioLogueado)
@@ -79,7 +87,7 @@ function loadProyecto() {
    DATOS DE EJEMPLO — MIS PAGOS
    Con Supabase conectado:
 
-   const { data: pagos } = await supabase
+   const { data: pagos } = await supabaseClient
      .from('pagos')
      .select('concepto, monto, estado, fecha')
      .eq('cliente_id', clienteIdDelUsuarioLogueado)

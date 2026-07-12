@@ -1,9 +1,3 @@
-/* ==========================================================
-   1) UI de pestañas primero — no depende de Supabase.
-      Así "Iniciar sesión" / "Crear cuenta" siempre funcionan,
-      incluso si el SDK de Supabase no llegó a cargar.
-   ========================================================== */
-
 const tabSignin = document.getElementById('tabSignin');
 const tabSignup = document.getElementById('tabSignup');
 const signinForm = document.getElementById('signinForm');
@@ -30,24 +24,22 @@ const selectedPlan = params.get('plan');   // 'pro' | 'plus' | 'premium' | null
 if (redirectTo) tabSignup.click();
 
 /* ==========================================================
-   2) Supabase — recién ahora. Si falla (todavía no configuraste
-      tu proyecto real), se avisa en pantalla en vez de romper
-      el resto del formulario.
+   Supabase
+   ⚠️ Importante: la variable NO se llama "supabase" porque el
+   SDK del CDN ya crea una variable global con ese nombre.
+   Si acá también declarás "let supabase", el navegador tira
+   "Identifier 'supabase' has already been declared" y se
+   rompe TODO el script (por eso los tabs tampoco funcionaban).
    ========================================================== */
-// ⚠️ Reemplazá estos dos valores con los de tu proyecto Supabase
-// (Project Settings → API → Project URL / anon public key)
 const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
 
-let supabase = null;
+let supabaseClient = null;
 let supabaseReady = false;
 
 try {
   if (!window.supabase) throw new Error('SDK de Supabase no cargó (revisá tu conexión a internet).');
-  if (SUPABASE_URL.includes('TU-PROYECTO') || SUPABASE_ANON_KEY.includes('TU-ANON-KEY')) {
-    throw new Error('Todavía no configuraste tu proyecto real de Supabase en este archivo.');
-  }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   supabaseReady = true;
 } catch (err) {
   console.warn('Supabase no está listo:', err.message);
@@ -97,7 +89,7 @@ function routeAfterAuth(user) {
 
 // Si ya hay sesión activa, saltar el login directamente
 if (supabaseReady) {
-  supabase.auth.getSession().then(({ data }) => {
+  supabaseClient.auth.getSession().then(({ data }) => {
     if (data.session) routeAfterAuth(data.session.user);
   });
 }
@@ -121,7 +113,7 @@ signinForm.addEventListener('submit', async function (e) {
   const email = document.getElementById('siEmail').value.trim();
   const password = document.getElementById('siPass').value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if (error) {
     errorBox.textContent = 'Email o contraseña incorrectos.';
@@ -154,7 +146,7 @@ signupForm.addEventListener('submit', async function (e) {
   const email = document.getElementById('suEmail').value.trim();
   const password = document.getElementById('suPass').value;
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
     options: { data: { nombre: nombre, role: 'cliente' } }
