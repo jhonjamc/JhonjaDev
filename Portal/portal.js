@@ -127,9 +127,12 @@ async function loadPagos() {
   }
 
   if (!pagos || pagos.length === 0) {
+    document.getElementById('pagosResumen').innerHTML = '';
     document.getElementById('pagosBody').innerHTML = `<tr><td colspan="4">Todavía no tenés pagos registrados.</td></tr>`;
     return;
   }
+
+  renderResumenPendiente(pagos);
 
   const rows = pagos.map(p => {
     const e = ESTADOS_PAGO[p.estado] || ESTADOS_PAGO.pendiente;
@@ -143,6 +146,41 @@ async function loadPagos() {
     `;
   }).join('');
   document.getElementById('pagosBody').innerHTML = rows;
+}
+
+function renderResumenPendiente(pagos) {
+  const pendientes = pagos.filter(p => p.estado !== 'pagado');
+  const totalPendiente = pendientes.reduce((s, p) => s + Number(p.monto || 0), 0);
+  const proximo = pendientes
+    .filter(p => p.fecha)
+    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))[0];
+
+  const resumen = document.getElementById('pagosResumen');
+
+  if (pendientes.length === 0) {
+    resumen.innerHTML = `
+      <div class="resumen-card">
+        <div class="label">Pendiente por pagar</div>
+        <div class="value" style="color:var(--green)">$0 <small>Estás al día</small></div>
+      </div>
+    `;
+    return;
+  }
+
+  const fechaProxima = proximo?.fecha
+    ? new Date(proximo.fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
+
+  resumen.innerHTML = `
+    <div class="resumen-card alerta">
+      <div class="label">Pendiente por pagar</div>
+      <div class="value">${fmt(totalPendiente)} <small>${pendientes.length} pago(s)</small></div>
+    </div>
+    <div class="resumen-card">
+      <div class="label">Próximo pago</div>
+      <div class="value">${proximo ? fmt(proximo.monto) : '—'} <small>${proximo ? proximo.concepto + ' · ' + fechaProxima : 'Sin fecha definida'}</small></div>
+    </div>
+  `;
 }
 
 /* ---- modal: solicitar servicio adicional ---- */

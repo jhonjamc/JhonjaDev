@@ -181,3 +181,20 @@ td.cell-primary{ color:var(--text-1); font-weight:500; }
   background:rgba(51,214,166,.1); border:1px solid rgba(51,214,166,.3);
   border-radius:8px; padding:11px 14px;
 }
+
+/* ---- resumen de pagos pendientes ---- */
+.pagos-resumen{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+  gap:14px; margin-bottom:16px;
+}
+.pagos-resumen .resumen-card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:16px 18px;
+}
+.pagos-resumen .resumen-card.alerta{ border-color:rgba(255,183,77,.4); background:var(--amber-soft); }
+.pagos-resumen .label{
+  font-family:var(--font-mono); font-size:10.5px; color:var(--text-3);
+  text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;
+}
+.pagos-resumen .value{ font-family:var(--font-display); font-size:20px; font-weight:700; }
+.pagos-resumen .value small{ font-size:12px; color:var(--text-3); font-weight:500; display:block; margin-top:2px; }
