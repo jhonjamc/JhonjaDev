@@ -1,8 +1,3 @@
-/* ==========================================================
-   1) UI de pestañas primero — no depende de Supabase.
-      Así "Iniciar sesión" / "Crear cuenta" siempre funcionan,
-      incluso si el SDK de Supabase no llegó a cargar.
-   ========================================================== */
 const tabSignin = document.getElementById('tabSignin');
 const tabSignup = document.getElementById('tabSignup');
 const signinForm = document.getElementById('signinForm');
