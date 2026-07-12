@@ -14,7 +14,7 @@
   <a href="../Index/index.html" class="logo"><span>&lt;/&gt;</span> estudio.dev</a>
 
   <div class="login-card">
-    <div class="tabs">
+    <div class="tabs" id="authTabs">
       <button class="tab active" id="tabSignin" type="button">Iniciar sesión</button>
       <button class="tab" id="tabSignup" type="button">Crear cuenta</button>
     </div>
@@ -52,6 +52,16 @@
       <div class="form-error" id="signupError"></div>
       <button type="submit" class="submit-btn" id="signupBtn">Crear cuenta</button>
     </form>
+
+    <!-- ---- ÉXITO AL CREAR CUENTA (reemplaza el alert()) ---- -->
+    <div class="signup-success" id="signupSuccess">
+      <div class="success-icon">
+        <svg width="20" height="20" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>¡Cuenta creada!</h2>
+      <p id="signupSuccessMsg">Revisá tu email para confirmar tu cuenta antes de ingresar.</p>
+      <button type="button" class="submit-btn" id="goToSigninBtn">Ir a iniciar sesión</button>
+    </div>
   </div>
 
   <a href="../Index/index.html" class="back-link">← Volver al sitio</a>

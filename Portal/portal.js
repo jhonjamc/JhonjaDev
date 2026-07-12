@@ -11,6 +11,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
    "Identifier 'supabase' has already been declared"
    y se rompe TODO el script de la página (por eso nada andaba).
    ========================================================== */
+// ⚠️ Mismo email que en Login/login.js y en schema.sql
+const ADMIN_EMAIL = 'jhonjamoguea@icloud.com';
+
 let supabaseClient = null;
 let supabaseReady = false;
 try {
@@ -32,6 +35,10 @@ if (supabaseReady) {
   supabaseClient.auth.getSession().then(({ data }) => {
     if (!data.session) {
       window.location.href = '../Login/login.html';
+      return;
+    }
+    if ((data.session.user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+      window.location.href = '../Proyectos/proyectos.html';
       return;
     }
     document.getElementById('whoLabel').textContent =

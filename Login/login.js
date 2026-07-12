@@ -1,38 +1,66 @@
+const authTabs = document.getElementById('authTabs');
 const tabSignin = document.getElementById('tabSignin');
 const tabSignup = document.getElementById('tabSignup');
 const signinForm = document.getElementById('signinForm');
 const signupForm = document.getElementById('signupForm');
+const signupSuccess = document.getElementById('signupSuccess');
+const signupSuccessMsg = document.getElementById('signupSuccessMsg');
+const goToSigninBtn = document.getElementById('goToSigninBtn');
 
-tabSignin.addEventListener('click', () => {
+function showSignin() {
+  authTabs.style.display = 'flex';
   tabSignin.classList.add('active');
   tabSignup.classList.remove('active');
   signinForm.style.display = 'block';
   signupForm.style.display = 'none';
-});
-tabSignup.addEventListener('click', () => {
+  signupSuccess.classList.remove('show');
+}
+function showSignup() {
+  authTabs.style.display = 'flex';
   tabSignup.classList.add('active');
   tabSignin.classList.remove('active');
   signupForm.style.display = 'block';
   signinForm.style.display = 'none';
-});
+  signupSuccess.classList.remove('show');
+}
+
+tabSignin.addEventListener('click', showSignin);
+tabSignup.addEventListener('click', showSignup);
+goToSigninBtn.addEventListener('click', showSignin);
 
 const params = new URLSearchParams(window.location.search);
 const redirectTo = params.get('redirect'); // 'planes' | 'contacto' | null
 const selectedPlan = params.get('plan');   // 'pro' | 'plus' | 'premium' | null
 
 // Si vino desde un CTA de planes/contacto, arrancar en "Crear cuenta"
-if (redirectTo) tabSignup.click();
+if (redirectTo) showSignup();
 
 /* ==========================================================
    Supabase
    ⚠️ Importante: la variable NO se llama "supabase" porque el
    SDK del CDN ya crea una variable global con ese nombre.
-   Si acá también declarás "let supabase", el navegador tira
+   Si acá también se declara "let supabase", el navegador tira
    "Identifier 'supabase' has already been declared" y se
    rompe TODO el script (por eso los tabs tampoco funcionaban).
    ========================================================== */
 const SUPABASE_URL = 'https://ydpvldprmcllxiifvcmq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHZsZHBybWNsbHhpaWZ2Y21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTA4OTIsImV4cCI6MjA5OTM4Njg5Mn0.ewRQKowdlHugOSP_ul3C23qHsziLHkZ5_w1J1uBokao';
+
+// ⚠️ Tiene que ser EXACTAMENTE el mismo email que usás en schema.sql
+// para las políticas de admin (auth.jwt() ->> 'email' = '...').
+const ADMIN_EMAIL = 'jhonjamoguea@icloud.com';
+
+function translateAuthError(message) {
+  const m = (message || '').toLowerCase();
+  if (m.includes('already registered') || m.includes('already exists')) return 'Ya existe una cuenta con ese email. Iniciá sesión.';
+  if (m.includes('password')) return 'La contraseña debe tener al menos 6 caracteres.';
+  if (m.includes('invalid') && m.includes('email')) return 'Ese email no es válido.';
+  if (m.includes('rate limit') || m.includes('too many')) return 'Demasiados intentos. Esperá un minuto y probá de nuevo.';
+  if (m.includes('signups') && m.includes('disabled')) return 'El registro está deshabilitado en este momento.';
+  // Si no reconocemos el error, mostramos el mensaje real de Supabase
+  // en vez de un genérico que no dice nada.
+  return message || 'No se pudo crear la cuenta. Probá de nuevo.';
+}
 
 let supabaseClient = null;
 let supabaseReady = false;
@@ -81,8 +109,8 @@ function routeAfterAuth(user) {
     return;
   }
 
-  const role = user?.user_metadata?.role;
-  window.location.href = role === 'admin'
+  const isAdmin = (user?.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  window.location.href = isAdmin
     ? '../Proyectos/proyectos.html'
     : '../Portal/portal.html';
 }
@@ -116,7 +144,10 @@ signinForm.addEventListener('submit', async function (e) {
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if (error) {
-    errorBox.textContent = 'Email o contraseña incorrectos.';
+    const m = (error.message || '').toLowerCase();
+    errorBox.textContent = m.includes('email not confirmed')
+      ? 'Confirmá tu email antes de ingresar (revisá tu bandeja de entrada).'
+      : 'Email o contraseña incorrectos.';
     errorBox.classList.add('show');
     btn.disabled = false;
     btn.textContent = 'Ingresar';
@@ -152,21 +183,23 @@ signupForm.addEventListener('submit', async function (e) {
     options: { data: { nombre: nombre, role: 'cliente' } }
   });
 
+  btn.disabled = false;
+  btn.textContent = 'Crear cuenta';
+
   if (error) {
-    errorBox.textContent = error.message.includes('already registered')
-      ? 'Ya existe una cuenta con ese email. Iniciá sesión.'
-      : 'No se pudo crear la cuenta. Probá de nuevo.';
+    console.error('Error de signup:', error);
+    errorBox.textContent = translateAuthError(error.message);
     errorBox.classList.add('show');
-    btn.disabled = false;
-    btn.textContent = 'Crear cuenta';
     return;
   }
 
   if (!data.session) {
-    alert('Cuenta creada. Revisá tu email para confirmar antes de ingresar.');
-    tabSignin.click();
-    btn.disabled = false;
-    btn.textContent = 'Crear cuenta';
+    // Reemplaza el alert() nativo por el bloque de éxito integrado al diseño
+    signupSuccessMsg.textContent = 'Revisá tu email para confirmar tu cuenta antes de ingresar.';
+    authTabs.style.display = 'none';
+    signupForm.style.display = 'none';
+    signupSuccess.classList.add('show');
+    signupForm.reset();
     return;
   }
 
