@@ -150,10 +150,6 @@ async function loadPagos() {
 function renderResumenPendiente(pagos) {
   const pendientes = pagos.filter(p => p.estado !== 'pagado');
   const totalPendiente = pendientes.reduce((s, p) => s + Number(p.monto || 0), 0);
-  const proximo = pendientes
-    .filter(p => p.fecha)
-    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))[0];
-
   const resumen = document.getElementById('pagosResumen');
 
   if (pendientes.length === 0) {
@@ -166,18 +162,23 @@ function renderResumenPendiente(pagos) {
     return;
   }
 
-  const fechaProxima = proximo?.fecha
-    ? new Date(proximo.fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
-    : '—';
+  const items = pendientes
+    .slice()
+    .sort((a, b) => new Date(a.fecha || 0) - new Date(b.fecha || 0))
+    .map(p => {
+      const fecha = p.fecha
+        ? new Date(p.fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+        : 'Sin fecha';
+      const estadoLabel = p.estado === 'vencido' ? ' · vencido' : '';
+      return `<li><span>${p.concepto || 'Pago pendiente'}</span><span>${fmt(p.monto)} · ${fecha}${estadoLabel}</span></li>`;
+    })
+    .join('');
 
   resumen.innerHTML = `
-    <div class="resumen-card alerta">
+    <div class="resumen-card alerta resumen-card-full">
       <div class="label">Pendiente por pagar</div>
-      <div class="value">${fmt(totalPendiente)} <small>${pendientes.length} pago(s)</small></div>
-    </div>
-    <div class="resumen-card">
-      <div class="label">Próximo pago</div>
-      <div class="value">${proximo ? fmt(proximo.monto) : '—'} <small>${proximo ? proximo.concepto + ' · ' + fechaProxima : 'Sin fecha definida'}</small></div>
+      <div class="value">${fmt(totalPendiente)} <small>${pendientes.length} pago(s) — esto es lo que falta:</small></div>
+      <ul class="resumen-lista">${items}</ul>
     </div>
   `;
 }
