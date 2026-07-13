@@ -223,12 +223,12 @@
   var form = document.getElementById('contactForm');
   var submitBtn = document.getElementById('submitBtn');
   var successBox = document.getElementById('formSuccess');
+  var contactError = document.getElementById('contactError');
   form.addEventListener('submit', async function(e){
     e.preventDefault();
     if(!form.checkValidity()){ form.reportValidity(); return; }
+    contactError.classList.remove('show');
     if(!currentSession || !supabaseClient){
-      // el gate de arriba debería haber interceptado esto antes,
-      // pero por las dudas no dejamos pasar un envío sin sesión.
       goToLogin('contacto');
       return;
     }
@@ -242,15 +242,16 @@
     var mensaje = document.getElementById('fmsg').value.trim();
 
     try {
-      // Buscamos la fila de "clientes" del usuario logueado (la crea
-      // automáticamente el trigger de Supabase apenas se registra).
       var { data: cliente, error: clienteError } = await supabaseClient
         .from('clientes')
         .select('id')
         .eq('user_id', currentSession.user.id)
         .single();
 
-      if (clienteError || !cliente) throw clienteError || new Error('No se encontró el cliente');
+      if (clienteError || !cliente) {
+        console.error('No se encontró la fila de cliente para este usuario:', clienteError);
+        throw new Error('NO_CLIENTE');
+      }
 
       var { error: insertError } = await supabaseClient
         .from('contactos')
@@ -263,15 +264,20 @@
           estado: 'nuevo'
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error insertando en contactos:', insertError);
+        throw insertError;
+      }
 
       form.style.display = 'none';
       successBox.classList.add('show');
     } catch (err) {
-      console.error('Error guardando el contacto:', err);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Enviar mensaje';
-      alert('No se pudo enviar el mensaje. Probá de nuevo en un momento.');
+      contactError.textContent = err.message === 'NO_CLIENTE'
+        ? 'No pudimos encontrar tu cuenta de cliente. Cerrá sesión, volvé a entrar y probá de nuevo.'
+        : (err.message || 'No se pudo enviar el mensaje. Probá de nuevo en un momento.');
+      contactError.classList.add('show');
     }
   });
 
