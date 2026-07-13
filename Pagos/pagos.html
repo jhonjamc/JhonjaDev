@@ -108,6 +108,87 @@
   </main>
 </div>
 
+<!-- ---- MODAL: registrar pago ---- -->
+<div class="modal-overlay" id="pagoOverlay">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="pagoClose">✕</button>
+    <h2>Registrar pago recibido</h2>
+    <form id="pagoForm">
+      <div class="form-group">
+        <label for="pagoCliente">Cliente</label>
+        <select id="pagoCliente" required></select>
+      </div>
+      <div class="form-group">
+        <label for="pagoConcepto">Concepto</label>
+        <input type="text" id="pagoConcepto" placeholder='Ej: &quot;Plan Pro — 50% inicial&quot;' required>
+      </div>
+      <div class="form-group">
+        <label for="pagoMonto">Monto</label>
+        <input type="number" id="pagoMonto" min="0" step="1000" placeholder="Ej: 250000" required>
+      </div>
+      <div class="form-group">
+        <label for="pagoTipo">Tipo</label>
+        <select id="pagoTipo">
+          <option value="proyecto">Proyecto</option>
+          <option value="hosting">Hosting</option>
+          <option value="mensualidad">Mensualidad</option>
+          <option value="servicio_adicional">Servicio adicional</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="pagoMetodo">Forma de pago</label>
+        <select id="pagoMetodo">
+          <option value="transferencia">Transferencia</option>
+          <option value="efectivo">Efectivo</option>
+          <option value="wompi">Wompi</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="pagoEstado">Estado</label>
+        <select id="pagoEstado">
+          <option value="pagado">Pagado</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="vencido">Vencido</option>
+        </select>
+      </div>
+      <div class="form-error" id="pagoError"></div>
+      <button type="submit" class="submit-btn" id="pagoSubmitBtn">Registrar pago</button>
+    </form>
+  </div>
+</div>
+
+<!-- ---- MODAL: registrar gasto ---- -->
+<div class="modal-overlay" id="gastoOverlay">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="gastoClose">✕</button>
+    <h2>Registrar gasto</h2>
+    <form id="gastoForm">
+      <div class="form-group">
+        <label for="gastoConcepto">¿Qué gasto es?</label>
+        <select id="gastoConcepto" required>
+          <option value="Suscripción — Claude" data-categoria="herramientas">Suscripción — Claude</option>
+          <option value="Suscripción — ChatGPT" data-categoria="herramientas">Suscripción — ChatGPT</option>
+          <option value="Suscripción — Laravel" data-categoria="herramientas">Suscripción — Laravel</option>
+          <option value="Suscripción — Supabase" data-categoria="herramientas">Suscripción — Supabase</option>
+          <option value="Dominio" data-categoria="hosting">Dominio</option>
+          <option value="otro" data-categoria="otro">Otro (especificar)</option>
+        </select>
+      </div>
+      <div class="form-group" id="gastoOtroGroup" style="display:none;">
+        <label for="gastoOtroTexto">Describilo</label>
+        <input type="text" id="gastoOtroTexto" placeholder="Ej: Curso de diseño, licencia de ícono, etc.">
+      </div>
+      <div class="form-group">
+        <label for="gastoMonto">Monto</label>
+        <input type="number" id="gastoMonto" min="0" step="1000" placeholder="Ej: 30000" required>
+      </div>
+      <div class="form-error" id="gastoError"></div>
+      <button type="submit" class="submit-btn" id="gastoSubmitBtn">Registrar gasto</button>
+    </form>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="pagos.js" defer></script>
 </body>

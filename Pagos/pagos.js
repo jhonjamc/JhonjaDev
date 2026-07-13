@@ -106,48 +106,59 @@ async function cambiarEstadoPago(id, estadoActual) {
   loadPagos();
 }
 
-/* ---- registrar un pago nuevo (manual) ---- */
-async function registrarPago() {
+/* ---- modal: registrar pago ---- */
+const pagoOverlay = document.getElementById('pagoOverlay');
+const pagoForm = document.getElementById('pagoForm');
+const pagoError = document.getElementById('pagoError');
+const pagoSubmitBtn = document.getElementById('pagoSubmitBtn');
+const pagoClienteSelect = document.getElementById('pagoCliente');
+
+async function abrirModalPago() {
   const { data: clientes, error } = await supabaseClient.from('clientes').select('id, nombre').order('nombre');
-  if (error || !clientes || clientes.length === 0) { alert('No hay clientes cargados todavía.'); return; }
+  if (error || !clientes || clientes.length === 0) {
+    alert('No hay clientes cargados todavía. Convertí un contacto en proyecto primero, desde el panel de Proyectos.');
+    return;
+  }
+  pagoClienteSelect.innerHTML = clientes.map(c => `<option value="${c.id}">${c.nombre || '(sin nombre)'}</option>`).join('');
+  pagoForm.reset();
+  pagoError.classList.remove('show');
+  pagoOverlay.classList.add('show');
+}
 
-  const listado = clientes.map((c, i) => `${i + 1}. ${c.nombre || '(sin nombre)'}`).join('\n');
-  const seleccion = prompt(`¿A qué cliente le registrás el pago? Escribí el número:\n\n${listado}`);
-  if (seleccion === null) return;
-  const cliente = clientes[parseInt(seleccion, 10) - 1];
-  if (!cliente) { alert('Número inválido.'); return; }
+document.getElementById('btnRegistrarPago').addEventListener('click', abrirModalPago);
+document.getElementById('pagoClose').addEventListener('click', () => pagoOverlay.classList.remove('show'));
+pagoOverlay.addEventListener('click', (e) => { if (e.target === pagoOverlay) pagoOverlay.classList.remove('show'); });
 
-  const concepto = prompt('Concepto (ej: "Plan Pro — 50% inicial", "Hosting anual", "Integración WhatsApp"):');
-  if (concepto === null || !concepto.trim()) return;
+pagoForm.addEventListener('submit', async function (e) {
+  e.preventDefault();
+  pagoError.classList.remove('show');
+  pagoSubmitBtn.disabled = true;
+  pagoSubmitBtn.textContent = 'Registrando…';
 
-  const montoRaw = prompt('Monto (solo números):');
-  if (montoRaw === null) return;
-  const monto = parseInt(montoRaw.replace(/\D/g, ''), 10);
-  if (!monto) { alert('Monto inválido.'); return; }
-
-  const tipo = prompt('Tipo (proyecto / hosting / mensualidad / servicio_adicional):', 'proyecto');
-  if (tipo === null) return;
-
-  const metodo_pago = prompt('Forma de pago (transferencia / efectivo / wompi / otro):', 'transferencia');
-  if (metodo_pago === null) return;
-
-  const estado = prompt('Estado (pagado / pendiente / vencido):', 'pagado');
-  if (estado === null) return;
-
-  const { error: insertError } = await supabaseClient.from('pagos').insert({
-    cliente_id: cliente.id,
-    concepto: concepto.trim(),
-    monto,
-    tipo: tipo.trim(),
-    metodo_pago: metodo_pago.trim(),
-    estado: estado.trim(),
+  const { error } = await supabaseClient.from('pagos').insert({
+    cliente_id: pagoClienteSelect.value,
+    concepto: document.getElementById('pagoConcepto').value.trim(),
+    monto: parseInt(document.getElementById('pagoMonto').value, 10),
+    tipo: document.getElementById('pagoTipo').value,
+    metodo_pago: document.getElementById('pagoMetodo').value,
+    estado: document.getElementById('pagoEstado').value,
     fecha: today(),
   });
 
-  if (insertError) { console.error(insertError); alert('No se pudo registrar el pago.'); return; }
+  pagoSubmitBtn.disabled = false;
+  pagoSubmitBtn.textContent = 'Registrar pago';
+
+  if (error) {
+    console.error(error);
+    pagoError.textContent = 'No se pudo registrar el pago. Probá de nuevo.';
+    pagoError.classList.add('show');
+    return;
+  }
+
+  pagoOverlay.classList.remove('show');
   loadPagos();
   loadCartera();
-}
+});
 
 /* ---- gastos / inversión ---- */
 let gastosCache = [];
@@ -183,43 +194,68 @@ function renderGastos() {
   `).join('');
 }
 
-async function registrarGasto() {
-  const opciones = [
-    { label: 'Suscripción — Claude', categoria: 'herramientas' },
-    { label: 'Suscripción — ChatGPT', categoria: 'herramientas' },
-    { label: 'Suscripción — Laravel', categoria: 'herramientas' },
-    { label: 'Suscripción — Supabase', categoria: 'herramientas' },
-    { label: 'Dominio', categoria: 'hosting' },
-    { label: 'Otro (especificar)', categoria: 'otro' },
-  ];
-  const listado = opciones.map((o, i) => `${i + 1}. ${o.label}`).join('\n');
-  const seleccion = prompt(`¿Qué gasto registrás? Escribí el número:\n\n${listado}`);
-  if (seleccion === null) return;
-  const opcion = opciones[parseInt(seleccion, 10) - 1];
-  if (!opcion) { alert('Número inválido.'); return; }
+/* ---- modal: registrar gasto ---- */
+const gastoOverlay = document.getElementById('gastoOverlay');
+const gastoForm = document.getElementById('gastoForm');
+const gastoError = document.getElementById('gastoError');
+const gastoSubmitBtn = document.getElementById('gastoSubmitBtn');
+const gastoConceptoSelect = document.getElementById('gastoConcepto');
+const gastoOtroGroup = document.getElementById('gastoOtroGroup');
+const gastoOtroTexto = document.getElementById('gastoOtroTexto');
 
-  let concepto = opcion.label;
-  if (opcion.label.startsWith('Otro')) {
-    concepto = prompt('Concepto del gasto:');
-    if (concepto === null || !concepto.trim()) return;
-    concepto = concepto.trim();
+document.getElementById('btnRegistrarGasto').addEventListener('click', () => {
+  gastoForm.reset();
+  gastoOtroGroup.style.display = 'none';
+  gastoError.classList.remove('show');
+  gastoOverlay.classList.add('show');
+});
+document.getElementById('gastoClose').addEventListener('click', () => gastoOverlay.classList.remove('show'));
+gastoOverlay.addEventListener('click', (e) => { if (e.target === gastoOverlay) gastoOverlay.classList.remove('show'); });
+
+gastoConceptoSelect.addEventListener('change', () => {
+  const esOtro = gastoConceptoSelect.value === 'otro';
+  gastoOtroGroup.style.display = esOtro ? 'block' : 'none';
+  gastoOtroTexto.required = esOtro;
+});
+
+gastoForm.addEventListener('submit', async function (e) {
+  e.preventDefault();
+  gastoError.classList.remove('show');
+
+  const opcionSeleccionada = gastoConceptoSelect.options[gastoConceptoSelect.selectedIndex];
+  const esOtro = gastoConceptoSelect.value === 'otro';
+  const concepto = esOtro ? gastoOtroTexto.value.trim() : gastoConceptoSelect.value;
+  const categoria = opcionSeleccionada.dataset.categoria;
+
+  if (esOtro && !concepto) {
+    gastoError.textContent = 'Describí de qué gasto se trata.';
+    gastoError.classList.add('show');
+    return;
   }
 
-  const montoRaw = prompt('Monto (solo números):');
-  if (montoRaw === null) return;
-  const monto = parseInt(montoRaw.replace(/\D/g, ''), 10);
-  if (!monto) { alert('Monto inválido.'); return; }
+  gastoSubmitBtn.disabled = true;
+  gastoSubmitBtn.textContent = 'Registrando…';
 
   const { error } = await supabaseClient.from('gastos').insert({
     concepto,
-    monto,
-    categoria: opcion.categoria,
+    monto: parseInt(document.getElementById('gastoMonto').value, 10),
+    categoria,
     fecha: today(),
   });
 
-  if (error) { console.error(error); alert('No se pudo registrar el gasto.'); return; }
+  gastoSubmitBtn.disabled = false;
+  gastoSubmitBtn.textContent = 'Registrar gasto';
+
+  if (error) {
+    console.error(error);
+    gastoError.textContent = 'No se pudo registrar el gasto. Probá de nuevo.';
+    gastoError.classList.add('show');
+    return;
+  }
+
+  gastoOverlay.classList.remove('show');
   loadGastos();
-}
+});
 
 /* ---- cartera: total contratado/cobrado por cliente ---- */
 async function loadCartera() {
@@ -263,9 +299,6 @@ async function loadCartera() {
   await loadPagos();
   await loadCartera();
 })();
-
-document.getElementById('btnRegistrarPago').addEventListener('click', registrarPago);
-document.getElementById('btnRegistrarGasto').addEventListener('click', registrarGasto);
 
 document.getElementById('logoutBtn').addEventListener('click', async function (e) {
   e.preventDefault();

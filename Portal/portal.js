@@ -126,13 +126,12 @@ async function loadPagos() {
     return;
   }
 
+  renderResumenPendiente(pagos || []);
+
   if (!pagos || pagos.length === 0) {
-    document.getElementById('pagosResumen').innerHTML = '';
     document.getElementById('pagosBody').innerHTML = `<tr><td colspan="4">Todavía no tenés pagos registrados.</td></tr>`;
     return;
   }
-
-  renderResumenPendiente(pagos);
 
   const rows = pagos.map(p => {
     const e = ESTADOS_PAGO[p.estado] || ESTADOS_PAGO.pendiente;
