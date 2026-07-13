@@ -238,6 +238,7 @@
 
     var nombre = document.getElementById('fname').value.trim();
     var email = document.getElementById('femail').value.trim();
+    var telefono = document.getElementById('fphone').value.trim();
     var plan = document.getElementById('fplan').value;
     var mensaje = document.getElementById('fmsg').value.trim();
 
@@ -259,6 +260,7 @@
           cliente_id: cliente.id,
           nombre: nombre,
           email: email,
+          telefono: telefono,
           plan_interes: plan,
           mensaje: mensaje,
           estado: 'nuevo'
@@ -268,6 +270,16 @@
         console.error('Error insertando en contactos:', insertError);
         throw insertError;
       }
+
+      // Notificación por email vía Resend (a través de una Edge Function,
+      // porque Resend no se puede llamar directo desde el navegador).
+      // Si la función todavía no está desplegada, esto falla en silencio:
+      // el contacto queda guardado igual en Supabase.
+      supabaseClient.functions.invoke('notificar-contacto', {
+        body: { nombre, telefono, email, plan_interes: plan, mensaje }
+      }).catch(function (err) {
+        console.error('El contacto se guardó, pero no se pudo mandar el email de aviso:', err);
+      });
 
       form.style.display = 'none';
       successBox.classList.add('show');
