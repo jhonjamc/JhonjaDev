@@ -9,6 +9,15 @@ try {
   console.error('No se pudo iniciar Supabase:', err.message);
 }
 
+function showLoadingSkeleton() {
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+  `;
+  document.getElementById('serviciosBody').innerHTML = `<tr><td colspan="6">Cargando solicitudes…</td></tr>`;
+}
+
 async function checkAdminAccess() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) { window.location.href = '../Login/login.html'; return false; }
@@ -133,6 +142,7 @@ async function marcarPagado(solicitudId, clienteId, servicio, monto) {
 
 /* ---- init ---- */
 (async function init() {
+  showLoadingSkeleton();
   const ok = await checkAdminAccess();
   if (!ok) return;
   loadSolicitudes();

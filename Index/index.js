@@ -15,6 +15,7 @@
     document.querySelectorAll('.nav-account-link').forEach(function (el) {
       el.href = destino;
       el.textContent = texto;
+      el.classList.remove('is-loading');
     });
   }
 

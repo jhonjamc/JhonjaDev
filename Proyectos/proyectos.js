@@ -18,6 +18,15 @@ const ESTADOS = {
 const ESTADOS_KEYS = Object.keys(ESTADOS);
 
 /* ---- guard: solo el admin puede ver este panel ---- */
+function showLoadingSkeleton() {
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+  `;
+  document.getElementById('proyectosBody').innerHTML = `<tr><td colspan="6">Cargando proyectos…</td></tr>`;
+}
+
 async function checkAdminAccess() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) {
@@ -291,6 +300,7 @@ async function verDetalleProyecto(proyectoId) {
 
 /* ---- init ---- */
 (async function init() {
+  showLoadingSkeleton();
   const ok = await checkAdminAccess();
   if (!ok) return;
   loadContactos();

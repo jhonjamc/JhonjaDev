@@ -9,6 +9,18 @@ try {
   console.error('No se pudo iniciar Supabase:', err.message);
 }
 
+function showLoadingSkeleton() {
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+  `;
+  document.getElementById('pagosBody').innerHTML = `<tr><td colspan="7">Cargando movimientos…</td></tr>`;
+  document.getElementById('gastosBody').innerHTML = `<tr><td colspan="4">Cargando…</td></tr>`;
+  document.getElementById('carteraBody').innerHTML = `<tr><td colspan="4">Cargando…</td></tr>`;
+}
+
 async function checkAdminAccess() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) { window.location.href = '../Login/login.html'; return false; }
@@ -293,6 +305,7 @@ async function loadCartera() {
 
 /* ---- init ---- */
 (async function init() {
+  showLoadingSkeleton();
   const ok = await checkAdminAccess();
   if (!ok) return;
   await loadGastos();

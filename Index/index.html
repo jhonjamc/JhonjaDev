@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Desarrollo y diseño a medida para tu negocio en línea" />
 <title>Jhonja Dev — Desarrollo y diseño a medida</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="index.css">
+<style>.nav-account-link.is-loading{ visibility:hidden; }</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -28,10 +28,10 @@
       <a href="#planes">Planes</a>
       <a href="#servicios">Servicios</a>
       <a href="#contacto">Contacto</a>
-      <a href="../Login/login.html" class="nav-login-mobile nav-account-link">Iniciar sesión</a>
+      <a href="../Login/login.html" class="nav-login-mobile nav-account-link is-loading">Iniciar sesión</a>
     </nav>
     <div class="nav-cta">
-      <a href="../Login/login.html" class="btn btn-ghost nav-account-link">Iniciar sesión</a>
+      <a href="../Login/login.html" class="btn btn-ghost nav-account-link is-loading">Iniciar sesión</a>
       <a href="#contacto" class="btn btn-primary" data-gate="contacto">Pedir presupuesto</a>
       <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
     </div>
